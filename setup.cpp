@@ -38,13 +38,15 @@
 #include "mbed-trace-helper.h"
 #include "factory_configurator_client.h"
 
+// Network interface
+#include "EthernetInterface.h"
+EthernetInterface eth;
 
 ////////////////////////////////////////
 // PLATFORM SPECIFIC DEFINES & FUNCTIONS
 ////////////////////////////////////////
 #define DEFAULT_FIRMWARE_PATH       "/sd/firmware"
 
-#include "easy-connect/easy-connect.h"
 #include "mbed_trace.h"
 #define TRACE_GROUP "exam"
 
@@ -69,10 +71,9 @@ BlockDevice* sd = NULL;
 
 
 Thread resource_thread;
-void *network_interface(NULL);
+//void *network_interface(NULL);
+NetworkInterface* network_interface = NULL;
 
-// Create network interface
-//EthernetInterface eth;
 
 void button_press(void)
 {
@@ -147,10 +148,58 @@ int run_application(int(*function)(void))
     return function();
 }
 
+// Helper function, could be moved someone else
+void print_MAC(NetworkInterface* network_interface, bool log_messages) {
+#if MBED_CONF_APP_NETWORK_INTERFACE != CELLULAR_ONBOARD
+    const char *mac_addr = network_interface->get_mac_address();
+    if (mac_addr == NULL) {
+        if (log_messages) {
+            printf("ERROR - No MAC address\n");
+        }
+        return;
+    }
+    if (log_messages) {
+        printf("MAC address %s\n", mac_addr);
+    }
+#endif
+}
+
 bool init_connection()
 {
+    int connect_success = -1;
+    bool log_messages = 1;
+
     srand(time(NULL));
-    network_interface = easy_connect(true);
+
+    printf("Using Ethernet\n");
+
+    network_interface = &eth;
+    connect_success = eth.connect();
+
+    if(connect_success == 0) {
+        if (log_messages) {
+            printf("Connected to Network successfully\n");
+            print_MAC(network_interface, log_messages);
+        }
+    } else {
+        if (log_messages) {
+            print_MAC(network_interface, log_messages);
+            printf("Connection to Network Failed %d!\n", connect_success);
+        }
+        return NULL;
+    }
+    const char *ip_addr  = network_interface->get_ip_address();
+    if (ip_addr == NULL) {
+        if (log_messages) {
+            printf("ERROR - No IP address\n");
+        }
+        return NULL;
+    }
+
+    if (log_messages) {
+        printf("IP address %s\n", ip_addr);
+    }
+
     if(network_interface == NULL) {
         return false;
     }
@@ -292,7 +341,7 @@ bool application_init(void)
        return false;
     }
 
-    printf("Start simple mbed Cloud Client\n");
+    printf("Start Simple Mbed Cloud Client\n");
 
     if (application_init_fcc() != 0) {
         printf("Failed initializing FCC\n" );

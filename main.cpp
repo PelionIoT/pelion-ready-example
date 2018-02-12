@@ -17,17 +17,7 @@
 // ----------------------------------------------------------------------------
 
 #include "simple-mbed-cloud-client.h"
-#ifdef TARGET_LIKE_MBED
 #include "mbed.h"
-#endif
-
-static int main_application(void);
-
-int main()
-{
-    // run_application() will first initialize the program and then call main_application()
-    return run_application(&main_application);
-}
 
 // Pointers to the resources that will be created in main_application().
 static M2MResource* button_res;
@@ -112,14 +102,12 @@ void factory_reset(void *)
     }
 }
 
-int main_application(void)
+int main(void)
 {
     // IOTMORF-1712: DAPLINK starts the previous application during flashing a new binary
     // This is workaround to prevent possible deletion of credentials or storage corruption
     // while replacing the application binary.
-#ifdef TARGET_LIKE_MBED
     wait(2);
-#endif
 
     // SimpleClient is used for registering and unregistering resources to a server.
     SimpleMbedCloudClient mbedClient;
@@ -127,8 +115,8 @@ int main_application(void)
     // Save pointer to mbedClient so that other functions can access it.
     client = &mbedClient;
 
-#ifdef MBED_HEAP_STATS_ENABLED
     printf("Client initialized\r\n");
+#ifdef MBED_HEAP_STATS_ENABLED
     heap_stats();
 #endif
 
