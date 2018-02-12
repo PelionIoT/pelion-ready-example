@@ -152,10 +152,6 @@ int main_application(void)
     mbedClient.add_cloud_resource(5000, 0, 2, "factory_reset", M2MResourceInstance::STRING,
                  M2MBase::POST_ALLOWED, NULL, false, (void*)factory_reset, NULL);
 
-    // Print to screen if available.
-    clear_screen();
-    print_to_screen(0, 3, "Cloud Client: Connecting");
-
     mbedClient.register_and_connect();
 
     // Check if client is registering or registered, if true sleep and repeat.

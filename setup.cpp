@@ -17,7 +17,6 @@
 // ----------------------------------------------------------------------------
 
 
-#ifdef TARGET_LIKE_MBED
 ///////////
 // INCLUDES
 ///////////
@@ -34,16 +33,16 @@
 #include "EthernetInterface.h" // Networking interface include
 #include "simple-mbed-cloud-client.h"
 #include "storage-selector/storage-selector.h"
-#include "application_init.h"
 #include "pal.h"
+#include "mbed-trace/mbed_trace.h"
+#include "mbed-trace-helper.h"
+#include "factory_configurator_client.h"
+
 
 ////////////////////////////////////////
 // PLATFORM SPECIFIC DEFINES & FUNCTIONS
 ////////////////////////////////////////
 #define DEFAULT_FIRMWARE_PATH       "/sd/firmware"
-
-#define MBED_CONF_APP_ESP8266_TX MBED_CONF_APP_WIFI_TX
-#define MBED_CONF_APP_ESP8266_RX MBED_CONF_APP_WIFI_RX
 
 #include "easy-connect/easy-connect.h"
 #include "mbed_trace.h"
@@ -63,10 +62,7 @@ DigitalOut  led(MBED_CONF_APP_LED_PINNAME, LED_OFF);
 InterruptIn button(MBED_CONF_APP_BUTTON_PINNAME);
 
 static bool button_pressed = false;
-
 static void button_press(void);
-
-void init_screen();
 
 FileSystem* fs = filesystem_selector();
 BlockDevice* sd = NULL;
@@ -88,7 +84,6 @@ void button_press(void)
 /////////////////////////
 int initPlatform()
 {
-    init_screen();
     /* Explicit declaration to catch Block Device initialization errors. */
     sd = storage_selector();
 
@@ -167,55 +162,6 @@ void* get_network_interface()
     return network_interface;
 }
 
-void init_screen()
-{
-#ifdef MBED_APPLICATION_SHIELD
-    /* Turn off red LED */
-    DigitalOut ext_red(D5, 1);
-
-    /* Turn on green LED */
-    DigitalOut ext_green(D8, 0);
-
-    lcd = new C12832(D11, D13, D12, D7, D10);
-#endif
-}
-
-void print_to_screen(int x, int y, const char* buffer)
-{
-#ifdef MBED_APPLICATION_SHIELD
-    lcd->locate(x, y);
-
-    /* limit size to 25 characters */
-    char output_buffer[26] = { 0 };
-
-    size_t name_length = strnlen(buffer, 32);
-
-    /* if buffer is 32 characters, assume FlakeID */
-    if (name_length == 32)
-    {
-        /* < 64 bit timestamp >< 48 bit worker id>< 16 bit sequence number >
-           Discard 7 characters form worker ID but keep the timestamp and
-           sequence number
-        */
-        memcpy(&output_buffer[0], &buffer[0], 16);
-        memcpy(&output_buffer[16], &buffer[23], 9);
-    }
-    else
-    {
-        /* fill output buffer with buffer */
-        strncpy(output_buffer, buffer, 25);
-    }
-
-    lcd->printf("%s", output_buffer);
-#endif
-}
-
-void clear_screen()
-{
-#ifdef MBED_APPLICATION_SHIELD
-    lcd->cls();
-#endif
-}
 
 void toggle_led(void)
 {
@@ -250,4 +196,108 @@ void do_wait(int timeout_ms)
 {
     wait_ms(timeout_ms);
 }
-#endif // TARGET_LIKE_MBED
+
+
+static bool application_init_mbed_trace(void)
+{
+    // Create mutex for tracing to avoid broken lines in logs
+    if(!mbed_trace_helper_create_mutex()) {
+        printf("ERROR - Mutex creation for mbed_trace failed!\n");
+        return 1;
+    }
+
+    // Initialize mbed trace
+    mbed_trace_init();
+    mbed_trace_mutex_wait_function_set(mbed_trace_helper_mutex_wait);
+    mbed_trace_mutex_release_function_set(mbed_trace_helper_mutex_release);
+
+    return 0;
+}
+
+static void reset_storage(void)
+{
+    printf("Resets storage to an empty state.\n");
+    fcc_status_e delete_status = fcc_storage_delete();
+    if (delete_status != FCC_STATUS_SUCCESS) {
+        printf("Failed to delete storage - %d\n", delete_status);
+    }
+}
+
+static bool application_init_fcc(void)
+{
+    fcc_status_e status = fcc_init();
+    if(status != FCC_STATUS_SUCCESS) {
+        printf("fcc_init failed with status %d! - exit\n", status);
+        return 1;
+    }
+
+    // This is designed to simplify user-experience by auto-formatting the
+    // primary storage if no valid certificates exist.
+    // This should never be used for any kind of production devices.
+#ifndef MBED_CONF_APP_MCC_NO_AUTO_FORMAT
+    status = fcc_verify_device_configured_4mbed_cloud();
+    if (status != FCC_STATUS_SUCCESS) {
+        if (reformat_storage() != 0) {
+            return 1;
+        }
+    reset_storage();
+    }
+#endif
+
+    // Resets storage to an empty state.
+    // Use this function when you want to clear storage from all the factory-tool generated data and user data.
+    // After this operation device must be injected again by using factory tool or developer certificate.
+#ifdef RESET_STORAGE
+    reset_storage();
+#endif
+
+    // Deletes existing firmware images from storage.
+    // This deletes any existing firmware images during application startup.
+    // This compilation flag is currently implemented only for mbed OS.
+#ifdef RESET_FIRMWARE
+    bool status_erase = rmFirmwareImages();
+    if(status_erase == false) {
+        return 1;
+    }
+#endif
+
+#if MBED_CONF_APP_DEVELOPER_MODE == 1
+    printf("Start developer flow\n");
+    status = fcc_developer_flow();
+    if (status == FCC_STATUS_KCM_FILE_EXIST_ERROR) {
+        printf("Developer credentials already exists\n");
+    } else if (status != FCC_STATUS_SUCCESS) {
+        printf("Failed to load developer credentials - exit\n");
+        return 1;
+    }
+#endif
+    status = fcc_verify_device_configured_4mbed_cloud();
+    if (status != FCC_STATUS_SUCCESS) {
+        printf("Device not configured for mbed Cloud - exit\n");
+        return 1;
+    }
+
+    return 0;
+}
+
+bool application_init(void)
+{
+    if (application_init_mbed_trace() != 0) {
+        printf("Failed initializing mbed trace\n" );
+        return false;
+    }
+
+    if(initPlatform() != 0) {
+       printf("ERROR - initPlatform() failed!\n");
+       return false;
+    }
+
+    printf("Start simple mbed Cloud Client\n");
+
+    if (application_init_fcc() != 0) {
+        printf("Failed initializing FCC\n" );
+        return false;
+    }
+
+    return true;
+}

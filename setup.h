@@ -54,12 +54,6 @@ extern bool init_connection();
 // Returns network interface.
 extern void *get_network_interface();
 
-// Print text on the screen
-extern void print_to_screen(int x, int y, const char* buffer);
-
-// Clear screen
-extern void clear_screen();
-
 // Toggle led (if available)
 extern void toggle_led(void);
 
@@ -87,6 +81,12 @@ extern void do_wait(int timeout_ms);
 int run_application(int(*function)(void));
 
 extern bool runProgram(main_t mainFunc);
+
+extern bool application_init(void);
+
+extern bool rmFirmwareImages(void);
+
+extern int reformat_storage(void);
 
 #ifdef __cplusplus
 }
