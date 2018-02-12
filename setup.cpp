@@ -32,11 +32,13 @@
 #include "memory_tests.h"
 #include "EthernetInterface.h" // Networking interface include
 #include "simple-mbed-cloud-client.h"
-#include "storage-selector/storage-selector.h"
 #include "pal.h"
 #include "mbed-trace/mbed_trace.h"
 #include "mbed-trace-helper.h"
 #include "factory_configurator_client.h"
+
+#include "SDBlockDevice.h"
+#include "FATFileSystem.h"
 
 // Network interface
 #include "EthernetInterface.h"
@@ -66,12 +68,13 @@ InterruptIn button(MBED_CONF_APP_BUTTON_PINNAME);
 static bool button_pressed = false;
 static void button_press(void);
 
-FileSystem* fs = filesystem_selector();
-BlockDevice* sd = NULL;
+// Block device and Filesystem
+SDBlockDevice sd(PTE3, PTE1, PTE2, PTE4);
+FATFileSystem fs("sd", &sd);
 
 
 Thread resource_thread;
-//void *network_interface(NULL);
+
 NetworkInterface* network_interface = NULL;
 
 
@@ -86,18 +89,14 @@ void button_press(void)
 int initPlatform()
 {
     /* Explicit declaration to catch Block Device initialization errors. */
-    sd = storage_selector();
+    int sd_ret = sd.init();
 
-    if (sd) {
-        int sd_ret = sd->init();
-
-        if(sd_ret != BD_ERROR_OK) {
-            tr_error("initPlatform() - sd->init() failed with %d\n", sd_ret);
-            printf("SD card initialization failed. Verify that SD-card is attached.\n");
-            return -1;
-        }
-        tr_debug("initPlatform() - BlockDevice init OK.\n");
+    if(sd_ret != BD_ERROR_OK) {
+        tr_error("initPlatform() - sd.init() failed with %d\n", sd_ret);
+        printf("SD card initialization failed. Verify that SD-card is attached.\n");
+        return -1;
     }
+    tr_debug("initPlatform() - BlockDevice init OK.\n");
 
     if(MBED_CONF_APP_BUTTON_PINNAME != NC) {
         button.fall(&button_press);
@@ -125,8 +124,9 @@ int reformat_storage()
 {
     int reformat_result = -1;
     printf("Autoformatting the storage.\n");
-    if (sd) {
-        reformat_result = fs->reformat(sd);
+    if (1/*sd*/) {
+        // TODO
+        // reformat_result = fs.reformat(sd);
         if (reformat_result != 0) {
             printf("Autoformatting failed with error %d\n", reformat_result);
         }
@@ -148,7 +148,7 @@ int run_application(int(*function)(void))
     return function();
 }
 
-// Helper function, could be moved someone else
+// Helper function, could be moved someone sd
 void print_MAC(NetworkInterface* network_interface, bool log_messages) {
 #if MBED_CONF_APP_NETWORK_INTERFACE != CELLULAR_ONBOARD
     const char *mac_addr = network_interface->get_mac_address();

@@ -11,10 +11,7 @@
             "platform.stdio-baud-rate": 115200,
             "platform.stdio-convert-newlines": true,
             "mbed-client.event-loop-size": 1024,
-            "mbed-trace.enable": null,
-            "storage-selector.filesystem": "FAT",
-            "storage-selector.mount-point": "\"sd\"",
-            "storage-selector.storage": "SD_CARD"
+            "mbed-trace.enable": null
         },
         "K64F": {
             "target.mbed_app_start": "0x00020400",
