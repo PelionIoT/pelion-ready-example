@@ -1,3 +1,5 @@
-Note: this example is no longer in development. It has moved to:
+We'll soon remove this repository and move this templace to this location:
 
 https://os.mbed.com/teams/mbed-os-examples/code/mbed-cloud-example/
+
+
