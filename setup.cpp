@@ -68,10 +68,6 @@ InterruptIn button(MBED_CONF_APP_BUTTON_PINNAME);
 static bool button_pressed = false;
 static void button_press(void);
 
-// Block device and Filesystem
-SDBlockDevice sd(PTE3, PTE1, PTE2, PTE4);
-FATFileSystem fs("sd", &sd);
-
 
 Thread resource_thread;
 
@@ -89,7 +85,7 @@ void button_press(void)
 int initPlatform()
 {
     /* Explicit declaration to catch Block Device initialization errors. */
-    int sd_ret = sd.init();
+    /*int sd_ret = sd.init();
 
     if(sd_ret != BD_ERROR_OK) {
         tr_error("initPlatform() - sd.init() failed with %d\n", sd_ret);
@@ -97,7 +93,7 @@ int initPlatform()
         return -1;
     }
     tr_debug("initPlatform() - BlockDevice init OK.\n");
-
+    */
     if(MBED_CONF_APP_BUTTON_PINNAME != NC) {
         button.fall(&button_press);
     }
