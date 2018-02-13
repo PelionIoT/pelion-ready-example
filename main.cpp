@@ -16,33 +16,47 @@
 // limitations under the License.
 // ----------------------------------------------------------------------------
 
-#include "simple-mbed-cloud-client.h"
 #include "mbed.h"
+#include "mbed-trace/mbed_trace.h"
+#include "mbed-trace-helper.h"
+#include "simple-mbed-cloud-client.h"
+#include "key-config-manager/kcm_status.h"
+#include "key-config-manager/key_config_manager.h"
+#include "SDBlockDevice.h"
+#include "FATFileSystem.h"
+#include "EthernetInterface.h"
+
+#define LED_OFF                     1
+
+DigitalOut  led(LED_RED, LED_OFF);
+InterruptIn button(BUTTON1);
 
 // Pointers to the resources that will be created in main_application().
-static M2MResource* button_res;
-static M2MResource* pattern_res;
-static M2MResource* blink_res;
+static MbedCloudClientResource* pattern_ptr;
 
 // Pointer to mbedClient, used for calling close function.
 static SimpleMbedCloudClient *client;
 
-void pattern_updated(const char *)
- {
-    printf("PUT received, new value: %s\n", pattern_res->get_value_string().c_str());
+static bool button_pressed = false;
+
+void button_press() {
+    button_pressed = true;
+}
+
+void pattern_updated(const char *) {
+    printf("PUT received, new value: %s\n", pattern_ptr->get_value());
 }
 
 void blink_callback(void *) {
-    String pattern_string = pattern_res->get_value_string();
-    const char *pattern = pattern_string.c_str();
+    const char *pattern = pattern_ptr->get_value();
     printf("LED pattern = %s\n", pattern);
     // The pattern is something like 500:200:500, so parse that.
     // LED blinking is done while parsing.
-    toggle_led();
+    led = !led;
     while (*pattern != '\0') {
         // Wait for requested time.
-        do_wait(atoi(pattern));
-        toggle_led();
+        wait_ms(atoi(pattern));
+        led = !led;
         // Search for next value.
         pattern = strchr(pattern, ':');
         if(!pattern) {
@@ -50,7 +64,8 @@ void blink_callback(void *) {
         }
         pattern++;
     }
-    led_off();
+
+    led = LED_OFF;
 }
 
 void button_notification_status_callback(const M2MBase& object, const NoticationDeliveryStatus status)
@@ -83,14 +98,14 @@ void button_notification_status_callback(const M2MBase& object, const Notication
 }
 
 // This function is called when a POST request is received for resource 5000/0/1.
-void unregister(void *)
+void unregister_cb(void *)
 {
     printf("Unregister resource executed\n");
     client->close();
 }
 
 // This function is called when a POST request is received for resource 5000/0/2.
-void factory_reset(void *)
+void factory_reset_cb(void *)
 {
     printf("Factory reset resource executed\n");
     client->close();
@@ -109,45 +124,98 @@ int main(void)
     // while replacing the application binary.
     wait(2);
 
-    // SimpleClient is used for registering and unregistering resources to a server.
-    SimpleMbedCloudClient mbedClient;
+    // Misc OS setup
+    srand(time(NULL));
 
+    EthernetInterface net;
+    SDBlockDevice sd(PTE3, PTE1, PTE2, PTE4);
+    FATFileSystem fs("sd");
+
+    printf("Start Simple Mbed Cloud Client\n");
+
+    // Initialize button interrupt
+    button.fall(&button_press);
+
+    // Initialize SD card
+    int status = sd.init();
+    if (status != BD_ERROR_OK) {
+        printf("Failed to init SD card\r\n");
+        return -1;
+    }
+
+    // Mount the file system (reformatting on failure)
+    status = fs.mount(&sd);
+    if (status) {
+        printf("Failed to mount FAT file system, reformatting...\r\n");
+        status = fs.reformat(&sd);
+
+        if (status) {
+            printf("Failed to reformat FAT file system\r\n");
+            return -1;
+        } else {
+            printf("Reformat and mount complete\r\n");
+        }
+    }
+
+    printf("Connecting to the network using Ethernet...\n");
+
+    status = net.connect();
+    if (status) {
+        printf("Connection to Network Failed %d!\n", status);
+        return -1;
+    } else {
+        const char *ip_addr  = net.get_ip_address();
+        printf("Connected successfully\n");
+        printf("IP address %s\n", ip_addr);
+    }
+
+    SimpleMbedCloudClient mbedClient(&net);
     // Save pointer to mbedClient so that other functions can access it.
     client = &mbedClient;
 
+    status = mbedClient.init();
+    if (status) {
+        return -1;
+    }
+
     printf("Client initialized\r\n");
-#ifdef MBED_HEAP_STATS_ENABLED
-    heap_stats();
-#endif
 
-    // Create resource for button count. Path of this resource will be: 3200/0/5501.
-    button_res = mbedClient.add_cloud_resource(3200, 0, 5501, "button_resource", M2MResourceInstance::INTEGER,
-                              M2MBase::GET_ALLOWED, 0, true, NULL, (void*)button_notification_status_callback);
+    // Mbed Cloud Client resource setup
+    MbedCloudClientResource *button = mbedClient.create_resource("3200/0/5501", "button_resource");
+    button->set_value("0");
+    button->methods(M2MMethod::GET);
+    button->observable(true);
+    button->attach_notification(M2MMethod::GET, (void*)button_notification_status_callback);
 
-    // Create resource for led blinking pattern. Path of this resource will be: 3201/0/5853.
-    pattern_res = mbedClient.add_cloud_resource(3201, 0, 5853, "pattern_resource", M2MResourceInstance::STRING,
-                               M2MBase::GET_PUT_ALLOWED, "500:500:500:500", false, (void*)pattern_updated, NULL);
+    MbedCloudClientResource *pattern = mbedClient.create_resource("3201/0/5853", "pattern_resource");
+    pattern->set_value("500:500:500:500");
+    pattern->methods(M2MMethod::GET | M2MMethod::PUT);
+    pattern->attach(M2MMethod::PUT, (void*)pattern_updated);
+    pattern_ptr = pattern;
 
-    // Create resource for starting the led blinking. Path of this resource will be: 3201/0/5850.
-    blink_res = mbedClient.add_cloud_resource(3201, 0, 5850, "blink_resource", M2MResourceInstance::STRING,
-                             M2MBase::POST_ALLOWED, "", false, (void*)blink_callback, NULL);
+    MbedCloudClientResource *blink = mbedClient.create_resource("3201/0/5850", "blink_resource");
+    blink->methods(M2MMethod::POST);
+    blink->attach(M2MMethod::POST, (void*)blink_callback);
 
-    // Create resource for unregistering the device. Path of this resource will be: 5000/0/1.
-    mbedClient.add_cloud_resource(5000, 0, 1, "unregister", M2MResourceInstance::STRING,
-                 M2MBase::POST_ALLOWED, NULL, false, (void*)unregister, NULL);
+    MbedCloudClientResource *unregister = mbedClient.create_resource("5000/0/1", "unregister");
+    unregister->methods(M2MMethod::POST);
+    unregister->attach(M2MMethod::POST, (void*)unregister_cb);
 
-    // Create resource for running factory reset for the device. Path of this resource will be: 5000/0/2.
-    mbedClient.add_cloud_resource(5000, 0, 2, "factory_reset", M2MResourceInstance::STRING,
-                 M2MBase::POST_ALLOWED, NULL, false, (void*)factory_reset, NULL);
+    MbedCloudClientResource *factoryReset = mbedClient.create_resource("5000/0/2", "factory_reset");
+    factoryReset->methods(M2MMethod::POST);
+    factoryReset->attach(M2MMethod::POST, (void*)factory_reset_cb);
 
     mbedClient.register_and_connect();
 
     // Check if client is registering or registered, if true sleep and repeat.
     while (mbedClient.is_register_called()) {
         static int button_count = 0;
-        do_wait(100);
-        if (button_clicked()) {
-            button_res->set_value(++button_count);
+        wait_ms(100);
+
+        if (button_pressed) {
+            button_pressed = false;
+            printf("Button clicked %d times\r\n", ++button_count);
+            button->set_value(button_count);
         }
     }
 
