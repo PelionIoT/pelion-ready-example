@@ -53,8 +53,7 @@ However, adding a new platform requires the following:
 ```
 - [Optional] Change connectivity interface. By default uses Ethernet. See lines [xxx].
 - [Optional] Change the filesystem and/or the block device for storage. By default uses FAT filesystem over SD card. See lines [xxx].
-- Create a [bootloader binary](TBD) according to addresses specified in `mbed_app.json` to match storage configuration and add to the new application.
-
+- Create a [bootloader binary](TBD) according to addresses specified in `mbed_app.json`. The booloader has to use the same storage configuration specified in the application.
 
 ### Known issues
 
