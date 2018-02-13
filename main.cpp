@@ -17,12 +17,19 @@
 // ----------------------------------------------------------------------------
 
 #include "mbed.h"
-#include "setup.h"
+#include "mbed-trace/mbed_trace.h"
+#include "mbed-trace-helper.h"
 #include "simple-mbed-cloud-client.h"
 #include "key-config-manager/kcm_status.h"
 #include "key-config-manager/key_config_manager.h"
 #include "SDBlockDevice.h"
 #include "FATFileSystem.h"
+#include "EthernetInterface.h"
+
+#define LED_OFF                     1
+
+DigitalOut  led(LED_RED, LED_OFF);
+InterruptIn button(BUTTON1);
 
 // Pointers to the resources that will be created in main_application().
 static MbedCloudClientResource* pattern_ptr;
@@ -30,21 +37,26 @@ static MbedCloudClientResource* pattern_ptr;
 // Pointer to mbedClient, used for calling close function.
 static SimpleMbedCloudClient *client;
 
-void pattern_updated(const char *)
- {
+static bool button_pressed = false;
+
+void button_press() {
+    button_pressed = true;
+}
+
+void pattern_updated(const char *) {
     printf("PUT received, new value: %s\n", pattern_ptr->get_value());
 }
 
 void blink_callback(void *) {
-    char *pattern = pattern_ptr->get_value();
+    const char *pattern = pattern_ptr->get_value();
     printf("LED pattern = %s\n", pattern);
     // The pattern is something like 500:200:500, so parse that.
     // LED blinking is done while parsing.
-    toggle_led();
+    led = !led;
     while (*pattern != '\0') {
         // Wait for requested time.
-        do_wait(atoi(pattern));
-        toggle_led();
+        wait_ms(atoi(pattern));
+        led = !led;
         // Search for next value.
         pattern = strchr(pattern, ':');
         if(!pattern) {
@@ -52,7 +64,8 @@ void blink_callback(void *) {
         }
         pattern++;
     }
-    led_off();
+
+    led = LED_OFF;
 }
 
 void button_notification_status_callback(const M2MBase& object, const NoticationDeliveryStatus status)
@@ -111,27 +124,63 @@ int main(void)
     // while replacing the application binary.
     wait(2);
 
-    // SimpleClient is used for registering and unregistering resources to a server.
-    //EthernetInterface net;
+    // Misc OS setup
+    srand(time(NULL));
+
+    EthernetInterface net;
     SDBlockDevice sd(PTE3, PTE1, PTE2, PTE4);
     FATFileSystem fs("sd");
 
-    int status = fs.mount(&sd);
-    if (status) {
-        printf("Failed to mount FATFileSystem\r\n");
-        return 1;
+    printf("Start Simple Mbed Cloud Client\n");
+
+    // Initialize button interrupt
+    button.fall(&button_press);
+
+    // Initialize SD card
+    int status = sd.init();
+    if (status != BD_ERROR_OK) {
+        printf("Failed to init SD card\r\n");
+        return -1;
     }
 
-    SimpleMbedCloudClient mbedClient;//&net);
+    // Mount the file system (reformatting on failure)
+    status = fs.mount(&sd);
+    if (status) {
+        printf("Failed to mount FAT file system, reformatting...\r\n");
+        status = fs.reformat(&sd);
 
+        if (status) {
+            printf("Failed to reformat FAT file system\r\n");
+            return -1;
+        } else {
+            printf("Reformat and mount complete\r\n");
+        }
+    }
+
+    printf("Connecting to the network using Ethernet...\n");
+
+    status = net.connect();
+    if (status) {
+        printf("Connection to Network Failed %d!\n", status);
+        return -1;
+    } else {
+        const char *ip_addr  = net.get_ip_address();
+        printf("Connected successfully\n");
+        printf("IP address %s\n", ip_addr);
+    }
+
+    SimpleMbedCloudClient mbedClient(&net);
     // Save pointer to mbedClient so that other functions can access it.
     client = &mbedClient;
 
-    printf("Client initialized\r\n");
-#ifdef MBED_HEAP_STATS_ENABLED
-    heap_stats();
-#endif
+    status = mbedClient.init();
+    if (status) {
+        return -1;
+    }
 
+    printf("Client initialized\r\n");
+
+    // Mbed Cloud Client resource setup
     MbedCloudClientResource *button = mbedClient.create_resource("3200/0/5501", "button_resource");
     button->set_value("0");
     button->methods(M2MMethod::GET);
@@ -161,8 +210,10 @@ int main(void)
     // Check if client is registering or registered, if true sleep and repeat.
     while (mbedClient.is_register_called()) {
         static int button_count = 0;
-        do_wait(100);
-        if (button_clicked()) {
+        wait_ms(100);
+
+        if (button_pressed) {
+            button_pressed = false;
             printf("Button clicked %d times\r\n", ++button_count);
             button->set_value(button_count);
         }
