@@ -14,7 +14,6 @@
             "mbed-trace.enable": null
         },
         "K64F": {
-            "target.mbed_app_start": "0x00020400",
             "update-client.application-details": "0x00020000",
             "update-client.bootloader-details": "0x172e4"
         }
