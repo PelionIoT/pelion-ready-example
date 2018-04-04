@@ -10,12 +10,7 @@
         "*": {
             "platform.stdio-baud-rate": 115200,
             "platform.stdio-convert-newlines": true,
-            "mbed-client.event-loop-size": 1024,
             "mbed-trace.enable": null
-        },
-        "K64F": {
-            "update-client.application-details": "0x00020000",
-            "update-client.bootloader-details": "0x172e4"
         }
     },
     "config": {

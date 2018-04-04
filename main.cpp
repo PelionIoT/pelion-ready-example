@@ -26,10 +26,12 @@
 #include "FATFileSystem.h"
 #include "EthernetInterface.h"
 
-#define LED_OFF                     1
+// Placeholder to hardware that trigger events (timer, button, etc)
+Ticker timer;
 
-DigitalOut  led(LED_RED, LED_OFF);
-InterruptIn button(BUTTON1);
+// Placeholder for storage
+SDBlockDevice sd(PTE3, PTE1, PTE2, PTE4);
+FATFileSystem fs("sd");
 
 // Pointers to the resources that will be created in main_application().
 static MbedCloudClientResource* pattern_ptr;
@@ -44,97 +46,38 @@ void button_press() {
 }
 
 void pattern_updated(const char *) {
-    printf("PUT received, new value: %s\n", pattern_ptr->get_value());
+    printf("PUT received, new value: %s\n", pattern_ptr->get_value().c_str());
+    // Placeholder for PUT action
 }
 
 void blink_callback(void *) {
-    const char *pattern = pattern_ptr->get_value();
-    printf("LED pattern = %s\n", pattern);
+    String pattern_str = pattern_ptr->get_value();
+    const char *pattern = pattern_str.c_str();
+    printf("POST received. LED pattern = %s\n", pattern);
+    // Placeholder for POST action
     // The pattern is something like 500:200:500, so parse that.
-    // LED blinking is done while parsing.
-    led = !led;
-    while (*pattern != '\0') {
-        // Wait for requested time.
-        wait_ms(atoi(pattern));
-        led = !led;
-        // Search for next value.
-        pattern = strchr(pattern, ':');
-        if(!pattern) {
-            break; // while
-        }
-        pattern++;
-    }
-
-    led = LED_OFF;
 }
 
-void button_notification_status_callback(const M2MBase& object, const NoticationDeliveryStatus status)
+void button_callback(const M2MBase& object, const NoticationDeliveryStatus status)
 {
-    switch(status) {
-        case NOTIFICATION_STATUS_BUILD_ERROR:
-            printf("Notification callback: (%s) error when building CoAP message\n", object.uri_path());
-            break;
-        case NOTIFICATION_STATUS_RESEND_QUEUE_FULL:
-            printf("Notification callback: (%s) CoAP resend queue full\n", object.uri_path());
-            break;
-        case NOTIFICATION_STATUS_SENT:
-            printf("Notification callback: (%s) Notification sent to server\n", object.uri_path());
-            break;
-        case NOTIFICATION_STATUS_DELIVERED:
-            printf("Notification callback: (%s) Notification delivered\n", object.uri_path());
-            break;
-        case NOTIFICATION_STATUS_SEND_FAILED:
-            printf("Notification callback: (%s) Notification sending failed\n", object.uri_path());
-            break;
-        case NOTIFICATION_STATUS_SUBSCRIBED:
-            printf("Notification callback: (%s) subscribed\n", object.uri_path());
-            break;
-        case NOTIFICATION_STATUS_UNSUBSCRIBED:
-            printf("Notification callback: (%s) subscription removed\n", object.uri_path());
-            break;
-        default:
-            break;
-    }
+    printf("Button notification. Callback: (%s)\n", object.uri_path());
+    // Placeholder for GET
 }
 
-// This function is called when a POST request is received for resource 5000/0/1.
-void unregister_cb(void *)
-{
-    printf("Unregister resource executed\n");
-    client->close();
-}
-
-// This function is called when a POST request is received for resource 5000/0/2.
-void factory_reset_cb(void *)
-{
-    printf("Factory reset resource executed\n");
-    client->close();
-    kcm_status_e kcm_status = kcm_factory_reset();
-    if (kcm_status != KCM_STATUS_SUCCESS) {
-        printf("Failed to do factory reset - %d\n", kcm_status);
-    } else {
-        printf("Factory reset completed. Now restart the device\n");
-    }
-}
 
 int main(void)
 {
-    // IOTMORF-1712: DAPLINK starts the previous application during flashing a new binary
-    // This is workaround to prevent possible deletion of credentials or storage corruption
-    // while replacing the application binary.
+    // Requires DAPLink 245+ (https://github.com/ARMmbed/DAPLink/pull/364)
+    // Older versions: workaround to prevent possible deletion of credentials:
     wait(2);
 
     // Misc OS setup
     srand(time(NULL));
 
+    // Placeholder for network
     EthernetInterface net;
-    SDBlockDevice sd(PTE3, PTE1, PTE2, PTE4);
-    FATFileSystem fs("sd");
 
     printf("Start Simple Mbed Cloud Client\n");
-
-    // Initialize button interrupt
-    button.fall(&button_press);
 
     // Initialize SD card
     int status = sd.init();
@@ -148,7 +91,6 @@ int main(void)
     if (status) {
         printf("Failed to mount FAT file system, reformatting...\r\n");
         status = fs.reformat(&sd);
-
         if (status) {
             printf("Failed to reformat FAT file system\r\n");
             return -1;
@@ -185,27 +127,27 @@ int main(void)
     button->set_value("0");
     button->methods(M2MMethod::GET);
     button->observable(true);
-    button->attach_notification(M2MMethod::GET, (void*)button_notification_status_callback);
+    button->attach_notification_callback(button_callback);
 
     MbedCloudClientResource *pattern = mbedClient.create_resource("3201/0/5853", "pattern_resource");
     pattern->set_value("500:500:500:500");
     pattern->methods(M2MMethod::GET | M2MMethod::PUT);
-    pattern->attach(M2MMethod::PUT, (void*)pattern_updated);
+    pattern->attach_put_callback(pattern_updated);
     pattern_ptr = pattern;
 
     MbedCloudClientResource *blink = mbedClient.create_resource("3201/0/5850", "blink_resource");
     blink->methods(M2MMethod::POST);
-    blink->attach(M2MMethod::POST, (void*)blink_callback);
-
-    MbedCloudClientResource *unregister = mbedClient.create_resource("5000/0/1", "unregister");
-    unregister->methods(M2MMethod::POST);
-    unregister->attach(M2MMethod::POST, (void*)unregister_cb);
-
-    MbedCloudClientResource *factoryReset = mbedClient.create_resource("5000/0/2", "factory_reset");
-    factoryReset->methods(M2MMethod::POST);
-    factoryReset->attach(M2MMethod::POST, (void*)factory_reset_cb);
+    blink->attach_post_callback(blink_callback);
 
     mbedClient.register_and_connect();
+
+    // Wait for client to finish registering
+    while (!mbedClient.is_client_registered()) {
+        wait_ms(100);
+    }
+
+    // Placeholder for callback to update local resource when GET comes.
+    timer.attach(&button_press, 5.0);
 
     // Check if client is registering or registered, if true sleep and repeat.
     while (mbedClient.is_register_called()) {
@@ -214,7 +156,7 @@ int main(void)
 
         if (button_pressed) {
             button_pressed = false;
-            printf("Button clicked %d times\r\n", ++button_count);
+            printf("Simulated button clicked %d times\r\n", ++button_count);
             button->set_value(button_count);
         }
     }
