@@ -26,14 +26,14 @@
 Ticker timer;
 
 // An event queue is a very useful structure to debounce information between contexts (e.g. ISR and normal threads)
-// This is great because things such as network operations are illegal in ISR, so up'ing a resource in a button's fall() function is not allowed
+// This is great because things such as network operations are illegal in ISR, so updating a resource in a button's fall() function is not allowed
 EventQueue eventQueue;
 
-// Placeholder for storage, Mbed OS supports many other storage layers (like SPI flash, DataFlash, internal flash, etc.)
+// Storage implementation definition, currently using SDBlockDevice (SPI flash, DataFlash, and internal flash are also available)
 SDBlockDevice sd(PTE3, PTE1, PTE2, PTE4);
 FATFileSystem fs("sd");
 
-// Resource declarations. Declaring them here as we need them
+// Declaring pointers for access to Mbed Cloud Client resources outside of main()
 MbedCloudClientResource *button_res;
 MbedCloudClientResource *pattern_res;
 
@@ -59,7 +59,7 @@ void pattern_updated(MbedCloudClientResource *resource, m2m::String newValue) {
  * POST handler
  * @param resource The resource that triggered the callback
  * @param buffer If a body was passed to the POST function, this contains the data.
- *               Note that it gets recycled directly after leaving this function, so copy it if you need it longer.
+ *               Note that the buffer is deallocated after leaving this function, so copy it if you need it longer.
  * @param size Size of the body
  */
 void blink_callback(MbedCloudClientResource *resource, const uint8_t *buffer, uint16_t size) {
@@ -112,7 +112,7 @@ int main(void) {
     Thread eventThread;
     eventThread.start(callback(&eventQueue, &EventQueue::dispatch_forever));
 
-    printf("Starting Simple Cloud Client example\n");
+    printf("Starting Simple Mbed Cloud Client example\n");
 
     // Initialize SD card
     int status = sd.init();
@@ -184,6 +184,6 @@ int main(void) {
     // The timer fires on an interrupt context, but debounces it to the eventqueue, so it's safe to do network operations
     timer.attach(eventQueue.event(&fake_button_press), 5.0);
 
-    // Pause the main thread
-    wait(osWaitForever);
+    // Setup complete, so we now dispatch the shared queue from main
+    eventQueue.dispatch_forever();
 }
