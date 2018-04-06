@@ -1,5 +1,5 @@
 // ----------------------------------------------------------------------------
-// Copyright 2016-2017 ARM Ltd.
+// Copyright 2016-2018 ARM Ltd.
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -17,150 +17,173 @@
 // ----------------------------------------------------------------------------
 
 #include "mbed.h"
-#include "mbed-trace/mbed_trace.h"
-#include "mbed-trace-helper.h"
 #include "simple-mbed-cloud-client.h"
-#include "key-config-manager/kcm_status.h"
-#include "key-config-manager/key_config_manager.h"
 #include "SDBlockDevice.h"
 #include "FATFileSystem.h"
 #include "EthernetInterface.h"
 
-// Placeholder to hardware that trigger events (timer, button, etc)
+// This timer fires every 5 seconds (see initialization in main.cpp) to fake button presses
 Ticker timer;
 
-// Placeholder for storage
+// An event queue is a very useful structure to debounce information between contexts (e.g. ISR and normal threads)
+// This is great because things such as network operations are illegal in ISR, so updating a resource in a button's fall() function is not allowed
+EventQueue eventQueue;
+
+// Storage implementation definition, currently using SDBlockDevice (SPI flash, DataFlash, and internal flash are also available)
 SDBlockDevice sd(PTE3, PTE1, PTE2, PTE4);
 FATFileSystem fs("sd");
 
-// Pointers to the resources that will be created in main_application().
-static MbedCloudClientResource* pattern_ptr;
+// Declaring pointers for access to Mbed Cloud Client resources outside of main()
+MbedCloudClientResource *button_res;
+MbedCloudClientResource *pattern_res;
 
-// Pointer to mbedClient, used for calling close function.
-static SimpleMbedCloudClient *client;
+// This function gets triggered by the timer. It's easy to replace it by an InterruptIn and fall() mode on a real button
+void fake_button_press() {
+    int v = button_res->get_m2m_resource()->get_value_int() + 1;
 
-static bool button_pressed = false;
+    button_res->set_value(v);
 
-void button_press() {
-    button_pressed = true;
+    printf("Simulated button clicked %d times\n", v);
 }
 
-void pattern_updated(const char *) {
-    printf("PUT received, new value: %s\n", pattern_ptr->get_value().c_str());
-    // Placeholder for PUT action
+/**
+ * PUT handler
+ * @param resource The resource that triggered the callback
+ * @param newValue Updated value for the resource
+ */
+void pattern_updated(MbedCloudClientResource *resource, m2m::String newValue) {
+    printf("PUT received, new value: %s\n", newValue.c_str());
 }
 
-void blink_callback(void *) {
-    String pattern_str = pattern_ptr->get_value();
-    const char *pattern = pattern_str.c_str();
-    printf("POST received. LED pattern = %s\n", pattern);
-    // Placeholder for POST action
-    // The pattern is something like 500:200:500, so parse that.
+/**
+ * POST handler
+ * @param resource The resource that triggered the callback
+ * @param buffer If a body was passed to the POST function, this contains the data.
+ *               Note that the buffer is deallocated after leaving this function, so copy it if you need it longer.
+ * @param size Size of the body
+ */
+void blink_callback(MbedCloudClientResource *resource, const uint8_t *buffer, uint16_t size) {
+    printf("POST received. Going to blink LED pattern: %s\n", pattern_res->get_value().c_str());
+
+    static DigitalOut augmentedLed(LED1); // LED that is used for blinking the pattern
+
+    // Parse the pattern string, and toggle the LED in that pattern
+    string s = std::string(pattern_res->get_value().c_str());
+    size_t i = 0;
+    size_t pos = s.find(':');
+    while (pos != string::npos) {
+        wait_ms(atoi(s.substr(i, pos - i).c_str()));
+        augmentedLed = !augmentedLed;
+
+        i = ++pos;
+        pos = s.find(':', pos);
+
+        if (pos == string::npos) {
+            wait_ms(atoi(s.substr(i, s.length()).c_str()));
+            augmentedLed = !augmentedLed;
+        }
+    }
 }
 
-void button_callback(const M2MBase& object, const NoticationDeliveryStatus status)
-{
-    printf("Button notification. Callback: (%s)\n", object.uri_path());
-    // Placeholder for GET
+/**
+ * Notification callback handler
+ * @param resource The resource that triggered the callback
+ * @param status The delivery status of the notification
+ */
+void button_callback(MbedCloudClientResource *resource, const NoticationDeliveryStatus status) {
+    printf("Button notification, status %s (%d)\n", MbedCloudClientResource::delivery_status_to_string(status), status);
 }
 
+/**
+ * Registration callback handler
+ * @param endpoint Information about the registered endpoint such as the name (so you can find it back in portal)
+ */
+void registered(const ConnectorClientEndpointInfo *endpoint) {
+    printf("Connected to Mbed Cloud. Endpoint Name: %s\n", endpoint->internal_endpoint_name.c_str());
+}
 
-int main(void)
-{
+int main(void) {
+
     // Requires DAPLink 245+ (https://github.com/ARMmbed/DAPLink/pull/364)
     // Older versions: workaround to prevent possible deletion of credentials:
     wait(2);
 
-    // Misc OS setup
-    srand(time(NULL));
+    // An event queue is a very useful structure in Mbed OS, which allows you to switch between context (e.g. ISR and main thread)
+    Thread eventThread;
+    eventThread.start(callback(&eventQueue, &EventQueue::dispatch_forever));
 
-    // Placeholder for network
-    EthernetInterface net;
-
-    printf("Start Simple Mbed Cloud Client\n");
+    printf("Starting Simple Mbed Cloud Client example\n");
 
     // Initialize SD card
     int status = sd.init();
     if (status != BD_ERROR_OK) {
-        printf("Failed to init SD card\r\n");
+        printf("Failed to initialize SD card. Did you place one in your development board?\n");
         return -1;
     }
 
     // Mount the file system (reformatting on failure)
+    // Mbed OS also supports LittleFS - A small and resilient embedded file system
     status = fs.mount(&sd);
-    if (status) {
-        printf("Failed to mount FAT file system, reformatting...\r\n");
+    if (status != 0) {
+        printf("Failed to mount FAT file system, reformatting...\n");
         status = fs.reformat(&sd);
         if (status) {
-            printf("Failed to reformat FAT file system\r\n");
+            printf("Failed to reformat FAT file system. Is your SD card write-protected?\n");
             return -1;
         } else {
-            printf("Reformat and mount complete\r\n");
+            printf("Reformat and mount complete\n");
         }
     }
 
     printf("Connecting to the network using Ethernet...\n");
 
+    // Connect to the internet (DHCP is expected to be on)
+    EthernetInterface net;
     status = net.connect();
-    if (status) {
-        printf("Connection to Network Failed %d!\n", status);
-        return -1;
-    } else {
-        const char *ip_addr  = net.get_ip_address();
-        printf("Connected successfully\n");
-        printf("IP address %s\n", ip_addr);
-    }
 
-    SimpleMbedCloudClient mbedClient(&net);
-    // Save pointer to mbedClient so that other functions can access it.
-    client = &mbedClient;
-
-    status = mbedClient.init();
-    if (status) {
+    if (status != 0) {
+        printf("Connecting to the network failed %d!\n", status);
         return -1;
     }
 
-    printf("Client initialized\r\n");
+    printf("Connected to the network successfully. IP address: %s\n", net.get_ip_address());
 
-    // Mbed Cloud Client resource setup
-    MbedCloudClientResource *button = mbedClient.create_resource("3200/0/5501", "button_resource");
-    button->set_value("0");
-    button->methods(M2MMethod::GET);
-    button->observable(true);
-    button->attach_notification_callback(button_callback);
-
-    MbedCloudClientResource *pattern = mbedClient.create_resource("3201/0/5853", "pattern_resource");
-    pattern->set_value("500:500:500:500");
-    pattern->methods(M2MMethod::GET | M2MMethod::PUT);
-    pattern->attach_put_callback(pattern_updated);
-    pattern_ptr = pattern;
-
-    MbedCloudClientResource *blink = mbedClient.create_resource("3201/0/5850", "blink_resource");
-    blink->methods(M2MMethod::POST);
-    blink->attach_post_callback(blink_callback);
-
-    mbedClient.register_and_connect();
-
-    // Wait for client to finish registering
-    while (!mbedClient.is_client_registered()) {
-        wait_ms(100);
+    // SimpleMbedCloudClient handles registering over LwM2M to Mbed Cloud
+    SimpleMbedCloudClient client(&net);
+    status = client.init();
+    if (status != 0) {
+        printf("Initializing Mbed Cloud Client failed (%d)\n", status);
+        return -1;
     }
+
+    // Creating resources, which can be written or read from the cloud
+    button_res = client.create_resource("3200/0/5501", "button_count");
+    button_res->set_value("0");
+    button_res->methods(M2MMethod::GET);
+    button_res->observable(true);
+    button_res->attach_notification_callback(button_callback);
+
+    pattern_res = client.create_resource("3201/0/5853", "blink_pattern");
+    pattern_res->set_value("500:500:500:500:500:500:500:500");
+    pattern_res->methods(M2MMethod::GET | M2MMethod::PUT);
+    pattern_res->attach_put_callback(pattern_updated);
+
+    MbedCloudClientResource *blink_res = client.create_resource("3201/0/5850", "blink_action");
+    blink_res->methods(M2MMethod::POST);
+    blink_res->attach_post_callback(blink_callback);
+
+    printf("Initialized Mbed Cloud Client. Registering...\n");
+
+    // Callback that fires when registering is complete
+    client.on_registered(&registered);
+
+    // Register with Mbed Cloud
+    client.register_and_connect();
 
     // Placeholder for callback to update local resource when GET comes.
-    timer.attach(&button_press, 5.0);
+    // The timer fires on an interrupt context, but debounces it to the eventqueue, so it's safe to do network operations
+    timer.attach(eventQueue.event(&fake_button_press), 5.0);
 
-    // Check if client is registering or registered, if true sleep and repeat.
-    while (mbedClient.is_register_called()) {
-        static int button_count = 0;
-        wait_ms(100);
-
-        if (button_pressed) {
-            button_pressed = false;
-            printf("Simulated button clicked %d times\r\n", ++button_count);
-            button->set_value(button_count);
-        }
-    }
-
-    // Client unregistered, exit program.
-    return 0;
+    // Setup complete, so we now dispatch the shared queue from main
+    eventQueue.dispatch_forever();
 }
