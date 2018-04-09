@@ -22,24 +22,21 @@
 #include "FATFileSystem.h"
 #include "EthernetInterface.h"
 
-// This timer fires every 5 seconds (see initialization in main.cpp) to fake button presses
-Ticker timer;
-
 // An event queue is a very useful structure to debounce information between contexts (e.g. ISR and normal threads)
-// This is great because things such as network operations are illegal in ISR, so updating a resource in a button's fall() function is not allowed
+// This is great because things such as network operations are illegal in ISR, so up'ing a resource in a button's fall() function is not allowed
 EventQueue eventQueue;
 
-// Storage implementation definition, currently using SDBlockDevice (SPI flash, DataFlash, and internal flash are also available)
+// Placeholder for storage, Mbed OS supports many other storage layers (like SPI flash, DataFlash, internal flash, etc.)
 SDBlockDevice sd(PTE3, PTE1, PTE2, PTE4);
-FATFileSystem fs("sd");
+FATFileSystem fs("sd", &sd);
 
-// Declaring pointers for access to Mbed Cloud Client resources outside of main()
+// Resource declarations. Declaring them here as we need them
 MbedCloudClientResource *button_res;
 MbedCloudClientResource *pattern_res;
 
 // This function gets triggered by the timer. It's easy to replace it by an InterruptIn and fall() mode on a real button
 void fake_button_press() {
-    int v = button_res->get_m2m_resource()->get_value_int() + 1;
+    int v = button_res->get_value_int() + 1;
 
     button_res->set_value(v);
 
@@ -59,7 +56,7 @@ void pattern_updated(MbedCloudClientResource *resource, m2m::String newValue) {
  * POST handler
  * @param resource The resource that triggered the callback
  * @param buffer If a body was passed to the POST function, this contains the data.
- *               Note that the buffer is deallocated after leaving this function, so copy it if you need it longer.
+ *               Note that it gets recycled directly after leaving this function, so copy it if you need it longer.
  * @param size Size of the body
  */
 void blink_callback(MbedCloudClientResource *resource, const uint8_t *buffer, uint16_t size) {
@@ -103,43 +100,12 @@ void registered(const ConnectorClientEndpointInfo *endpoint) {
 }
 
 int main(void) {
-
-    // Requires DAPLink 245+ (https://github.com/ARMmbed/DAPLink/pull/364)
-    // Older versions: workaround to prevent possible deletion of credentials:
-    wait(2);
-
-    // An event queue is a very useful structure in Mbed OS, which allows you to switch between context (e.g. ISR and main thread)
-    Thread eventThread;
-    eventThread.start(callback(&eventQueue, &EventQueue::dispatch_forever));
-
-    printf("Starting Simple Mbed Cloud Client example\n");
-
-    // Initialize SD card
-    int status = sd.init();
-    if (status != BD_ERROR_OK) {
-        printf("Failed to initialize SD card. Did you place one in your development board?\n");
-        return -1;
-    }
-
-    // Mount the file system (reformatting on failure)
-    // Mbed OS also supports LittleFS - A small and resilient embedded file system
-    status = fs.mount(&sd);
-    if (status != 0) {
-        printf("Failed to mount FAT file system, reformatting...\n");
-        status = fs.reformat(&sd);
-        if (status) {
-            printf("Failed to reformat FAT file system. Is your SD card write-protected?\n");
-            return -1;
-        } else {
-            printf("Reformat and mount complete\n");
-        }
-    }
-
+    printf("Starting Simple Cloud Client example\n");
     printf("Connecting to the network using Ethernet...\n");
 
     // Connect to the internet (DHCP is expected to be on)
     EthernetInterface net;
-    status = net.connect();
+    nsapi_error_t status = net.connect();
 
     if (status != 0) {
         printf("Connecting to the network failed %d!\n", status);
@@ -149,7 +115,7 @@ int main(void) {
     printf("Connected to the network successfully. IP address: %s\n", net.get_ip_address());
 
     // SimpleMbedCloudClient handles registering over LwM2M to Mbed Cloud
-    SimpleMbedCloudClient client(&net);
+    SimpleMbedCloudClient client(&net, &sd, &fs);
     status = client.init();
     if (status != 0) {
         printf("Initializing Mbed Cloud Client failed (%d)\n", status);
@@ -158,7 +124,7 @@ int main(void) {
 
     // Creating resources, which can be written or read from the cloud
     button_res = client.create_resource("3200/0/5501", "button_count");
-    button_res->set_value("0");
+    button_res->set_value(0);
     button_res->methods(M2MMethod::GET);
     button_res->observable(true);
     button_res->attach_notification_callback(button_callback);
@@ -182,8 +148,9 @@ int main(void) {
 
     // Placeholder for callback to update local resource when GET comes.
     // The timer fires on an interrupt context, but debounces it to the eventqueue, so it's safe to do network operations
+    Ticker timer;
     timer.attach(eventQueue.event(&fake_button_press), 5.0);
 
-    // Setup complete, so we now dispatch the shared queue from main
+    // You can easily run the eventQueue in a separate thread if required
     eventQueue.dispatch_forever();
 }
