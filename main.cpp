@@ -116,9 +116,9 @@ int main(void) {
 
     // SimpleMbedCloudClient handles registering over LwM2M to Mbed Cloud
     SimpleMbedCloudClient client(&net, &sd, &fs);
-    status = client.init();
-    if (status != 0) {
-        printf("Initializing Mbed Cloud Client failed (%d)\n", status);
+    int client_status = client.init();
+    if (client_status != 0) {
+        printf("Initializing Mbed Cloud Client failed (%d)\n", client_status);
         return -1;
     }
 
