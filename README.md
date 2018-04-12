@@ -370,9 +370,6 @@ In the main function, clear the button_count upon starting up, then print the va
 #### Update the LWM2M objects.
 	See guide at []
 
-## Known issues
-
-None.
 
 ## Enabling firmware updates
 
@@ -440,3 +437,7 @@ Now an update can be scheduled.
     ```
 
 1. When the download completes, the firmware is verified. If everything is OK, the firmware update is applied.
+
+## Known issues
+
+None.
