@@ -5,7 +5,7 @@
 This is a template application for platform vendors. It demonstrates how to create a simple Mbed Cloud Client application that can connect to Mbed Cloud, register resources and get ready to receive a firmware update.
 
 It's intended to be customized to add platform-specific features (sensors, actuators, etc) and configure the connectivity and storage to work **out-of-the-box**.
-The Simple Mbed Cloud Client template application works to work in **developer mode** by default.
+The Simple Mbed Cloud Client template application works in **developer mode** by default.
 
 ## Setup process
 
@@ -37,7 +37,7 @@ This is a summary of the process for developers to get started and get a device 
 ## Porting to a new platform
 
 ### Requirements
-The hardware requirements for Mbed OS platforms to support Mbed Cloud Client as shown [here].
+The hardware requirements for Mbed OS platforms to support Mbed Cloud Client are shown [here](https://cloud.mbed.com/docs/current/cloud-requirements/index.html).
 
 In general, to start creating a secure connected product, you need a microcontroller that has the following features.
 *	RAM: 96K or more
@@ -47,16 +47,16 @@ In general, to start creating a secure connected product, you need a microcontro
 
 Additionally, to use Mbed Cloud Client, the Microcontroller needs support for the following in Mbed-OS (latest version preferred) or in a compatible driver library.
 *	Storage Device (SDcard, SPI Flash, Data Flash)
-*	IP connectivity (Eth, Wifi, Cellular, 6lowpan, Thread)
+*	IP connectivity (Ethernet, WiFi, Cellular, 6lowpan, Thread)
 
 For Firmware update over the air (FOTA), the following is also needed.
-*	Flash In-Application Programming (IAP)
-*	Bootloader  (https://github.com/ARMmbed/mbed-bootloader)
+*	[FlashIAP](https://github.com/ARMmbed/mbed-os/blob/master/drivers/FlashIAP.h) - Flash In-Application Programming (IAP)
+*	[Mbed Bootloader](https://github.com/ARMmbed/mbed-bootloader) or compatible bootloader with Mbed Cloud Client
 
 ### References
-* Check which Microcontroller platforms are supported here [?]
-* Check which storage options are available here [?]
-* Check which network options are available here [?]
+* Check which Mbed OS platforms are supported in the [Mbed Cloud quick-start guide](https://cloud.test.mbed.com/quick-start)
+* Check which storage options are available [here](https://os.mbed.com/docs/v5.8/reference/storage.html)
+* Check which network options are available [here](https://os.mbed.com/docs/v5.8/reference/network-socket.html)
 
 
 ### Porting Steps
@@ -66,6 +66,9 @@ Supporting a new derivative platform requires the following steps:
 * Fork the template and create an example application for your platform in https://os.mbed.com
 * [Optional] Change connectivity interface. By default uses Ethernet - see `main.cpp`.
 * [Optional] Change the filesystem and/or the block device for storage. By default uses FAT filesystem over SD card. See `main.cpp`.
+* [Optional] Make minor changes in `mbed_app.json` to support multiple platforms with same connectivity and storage.
+
+ **Note:** Make sure to the application works Out-of-the-Box and no changes are required in `main.cpp`. The goal is to deliver a great UX to our developers.
 
 ### Porting Example
 
@@ -75,7 +78,7 @@ In this example, we’re going take an app that uses SD Card and on-chip Etherne
 
 ##### For SD Card:
 
-	Add the SD Card driver (sd-driver) if it is not already added.
+	Add the SD Card driver (sd-driver.lib) if it is not already added.
 
 On the command line
 
@@ -95,11 +98,11 @@ Next include the header files for the SD Driver and FAT File system.
 Declare global objects for the SD Card and File System.
 
 ```cpp
-SDBlockDevice sd(SPI_MOSI, SPI_MISO, SPI_SCK, SPI_CS);
+SDBlockDevice bd(SPI_MOSI, SPI_MISO, SPI_CLK, SPI_CS);
 FATFileSystem fs("sd", &sd);
 ```
 
-Note that the SPI_MOSI, SPI_MISO, etc macros represent pin names.  These pin names can be defined in a variety of places including the sd-driver, your project’s configuration file (mbed_app.json) or the pinnames.h file for the target that defines default pin names.  You can use other pin names depending on the platform and the connections.
+Note that the `SPI_*` macros represent pin names.  These pin names can be defined in a variety of places including the sd-driver, your project’s configuration file (`mbed_app.json`) or the pinnames.h file for the target that defines default pin names.  You can use other pin names depending on the platform and the connections.
 
 For example, if the SPI signals for the SD Card interface are connected on an Arduino compatible shield, you may define them like this:
 
@@ -139,7 +142,8 @@ SimpleMbedCloudClient client(&net, &spif, &fs);
 
 #### If required, change the Network interface.
 
-For Ethernet:
+##### For Ethernet:
+
 The Ethernet interface is included within Mbed OS, so no need to add a library.
 Include the header file for the interface.
 
@@ -239,7 +243,7 @@ mbed export -m Hexiwear -i uvision
 
 #### To create a custom target board
 
-  	References to porting guides to come…
+Read the Mbed OS [Contributing](https://os.mbed.com/docs/latest/reference/porting-targets.html) documentation on how to add a new target.
 
 #### Update the application logic
 
@@ -284,12 +288,13 @@ If you want to change this to an actual button, here is what you do:
 
 
 #### Update the LWM2M objects.
-	See guide at []
 
+See guide at [TODO]
 
 ## Enabling firmware updates
 
-To enable firmware updates a compatible bootloader needs to be added in the `tools/` folder. This currently only works when building with Mbed CLI.
+To enable firmware updates a compatible bootloader needs to be added in the `tools/` folder.
+The process to merge the application with the bootloader currently only works when building with Mbed CLI. In the future, this combine process will be done automatically by Mbed tools.
 
 1. Compile [mbed-bootloader](https://github.com/armmbed/mbed-bootloader) for the platform and storage configuration used in this application; and place the binary in the tools folder.
 1. Add a section to `mbed_app.json` under `target_overrides` with the bootloader configuration. An example is:
@@ -327,7 +332,7 @@ Next, instruct your users to do the following:
 1. Flash `combined.bin` to the development board.
 1. Write down the endpoint ID of the board. It's needed to start the update.
 
-Now an update can be scheduled.
+Now an Firmware Update can be scheduled as explained in the [Mbed Cloud documentation](https://cloud.mbed.com/docs/current/updating-firmware/index.html). This can be done with the manifest tool itself or with help from the Mbed Cloud portal. Here we explain how to do it with the manifest tool.
 
 1. Change the application, for example by changing some strings in `main.cpp`.
 1. Compile the application:
