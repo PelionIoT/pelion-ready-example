@@ -159,7 +159,7 @@ The Ethernet interface is included within Mbed OS, so you do not need to add a l
     EthernetInterface net;
     ```
 
-3- Connect the interface.
+3. Connect the interface.
 
     ```
     status = net.connect();
