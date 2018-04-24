@@ -364,3 +364,6 @@ Now, a firmware update can be scheduled as explained in the [Mbed Cloud document
 
 1. When the download completes, the firmware is verified. If everything is OK, the firmware update is applied.
 
+## Known issues
+
+Please check the issues reported on github.
