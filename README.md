@@ -303,7 +303,8 @@ Mbed Cloud Client v1.3.x introduces a new feature called SOTP that makes use of 
 Assuming the flash is divided into 2 sections for your target, the following changes are required to mbed_app.json
 1. Add a section to the target_overrides with sotp addresses and sizes.
 
-For example, for the NUCLEO_L476RG
+For example, for the NUCLEO_L476RG, it is:
+
     ```json
         "NUCLEO_L476RG": {
             "sotp-section-1-address"           : "(0x08000000+((1024-32)*1024))",
@@ -313,7 +314,9 @@ For example, for the NUCLEO_L476RG
             "sotp-num-sections"                : 2
         }
     ```
-2. Add the macro definition to the "config" section. Note that the address and size macros are already provided. You only have to add the macro for the number of sections
+
+2. Add the macro definition to the "config" section. Note that the address and size macros are already provided. You only have to add the macro for the number of sections:
+
     ```json
         "sotp-num-sections": {
             "help": "Number of SOTP sections",
