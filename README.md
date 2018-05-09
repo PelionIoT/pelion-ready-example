@@ -296,6 +296,32 @@ If you want to change this to an actual button, here is how to do it:
 
 See guide at [TODO]
 
+#### Mbed Cloud Client v1.3.x SOTP specific changes
+
+Mbed Cloud Client v1.3.x introduces a new feature called SOTP that makes use of the internal flash of the MCU as a One-Time-Programmable section in order to store the keys required to decrypt the credentials stored in the persistent storage. More information on this can be found [here](https://cloud.mbed.com/docs/current/porting/changing-a-customized-porting-layer.html#rtos-module) under the RTOS module.
+
+Assuming the flash is divided into 2 sections, the following changes are required to mbed_app.json
+1. Add a section to the target_overrides with sotp addresses and sizes.
+
+For example, for the NUCLEO_L476RG, it is:
+    ```json
+        "NUCLEO_L476RG": {
+            "sotp-section-1-address"           : "(0x08000000+((1024-32)*1024))",
+            "sotp-section-1-size"              : "(16*1024)",
+            "sotp-section-2-address"           : "(0x08000000+((1024-16)*1024))",
+            "sotp-section-2-size"              : "(16*1024)",
+            "sotp-num-sections"                : 2
+        }
+    ```
+1. Add the macro definition to the "config" section. Note that the address and size macros are already provided. You only have to add the macro for the number of sections.
+    ```json
+        "sotp-num-sections": {
+            "help": "Number of SOTP sections",
+            "macro_name": "PAL_INT_FLASH_NUM_SECTIONS",
+            "value": null
+        }
+    ```
+
 ## Enabling firmware updates
 
 To enable firmware updates, a compatible bootloader needs to be added in the `tools/` folder. The process to merge the application with the bootloader currently only works when building with Mbed CLI. In the future, this combine process will be done automatically by Mbed tools.
