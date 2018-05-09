@@ -300,10 +300,10 @@ See guide at [TODO]
 
 Mbed Cloud Client v1.3.x introduces a new feature called SOTP that makes use of the internal flash of the MCU as a One-Time-Programmable section in order to store the keys required to decrypt the credentials stored in the persistent storage. More information on this can be found [here](https://cloud.mbed.com/docs/current/porting/changing-a-customized-porting-layer.html#rtos-module) under the RTOS module.
 
-Assuming the flash is divided into 2 sections, the following changes are required to mbed_app.json
+Assuming the flash is divided into 2 sections for your target, the following changes are required to mbed_app.json
 1. Add a section to the target_overrides with sotp addresses and sizes.
 
-For example, for the NUCLEO_L476RG, it is:
+For example, for the NUCLEO_L476RG
     ```json
         "NUCLEO_L476RG": {
             "sotp-section-1-address"           : "(0x08000000+((1024-32)*1024))",
@@ -313,7 +313,7 @@ For example, for the NUCLEO_L476RG, it is:
             "sotp-num-sections"                : 2
         }
     ```
-1. Add the macro definition to the "config" section. Note that the address and size macros are already provided. You only have to add the macro for the number of sections.
+2. Add the macro definition to the "config" section. Note that the address and size macros are already provided. You only have to add the macro for the number of sections
     ```json
         "sotp-num-sections": {
             "help": "Number of SOTP sections",
