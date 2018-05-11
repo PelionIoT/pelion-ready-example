@@ -52,6 +52,7 @@ Additionally, to use Mbed Cloud Client, the microcontroller needs to support the
 For the Firmware update over the air (FOTA), you need the following:
 * [FlashIAP](https://github.com/ARMmbed/mbed-os/blob/master/drivers/FlashIAP.h) - Flash In-Application Programming (IAP)
 * [Mbed Bootloader](https://github.com/ARMmbed/mbed-bootloader) or a bootloader compatible with Mbed Cloud Client.
+* TCP connection - current Firmware Download client only supports HTTP-download over TCP (this will be resolved in a future release, so that CoAP blockwise transfer will be used for UDP connections).
 
 ### References
 
