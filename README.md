@@ -303,7 +303,7 @@ Mbed Cloud Client v1.3.x introduces a new feature called SOTP that makes use of 
 Assuming the flash is divided into 2 sections for your target, the following changes are required to mbed_app.json
 1. Add a section to the target_overrides with sotp addresses and sizes.
 
-For example, for the NUCLEO_L476RG, it is:
+For example, for the NUCLEO_L476RG, it is as shown below. Note that with these flash sectors shown below, the SOTP region is placed at the last 2 sectors of the flash. You can find memory map information from the reference manual for your MCU.
 
     ```json
         "NUCLEO_L476RG": {
