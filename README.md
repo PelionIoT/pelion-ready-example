@@ -40,19 +40,22 @@ This is a summary of the process for developers to get started and get a device 
 The hardware requirements for Mbed OS platforms to support Mbed Cloud Client are [here](https://cloud.mbed.com/docs/current/cloud-requirements/index.html).
 
 In general, to start creating a secure connected product, you need a microcontroller that has the following features.
+
 * RAM: 96K or more
 * Flash: 512K or more
 * True Random Number Generator (TRNG)
 * Real Time Clock (RTC)
 
 Additionally, to use Mbed Cloud Client, the microcontroller needs to support the following in Mbed OS (latest version preferred) or in a compatible driver library:
+
 * A storage device (SDcard, SPI Flash, Data Flash)
 * IP connectivity (Ethernet, WiFi, Cellular, 6LoWPAN, Thread)
 
 For the Firmware update over the air (FOTA), you need the following:
-* [FlashIAP](https://github.com/ARMmbed/mbed-os/blob/master/drivers/FlashIAP.h) - Flash In-Application Programming (IAP)
+
+* [FlashIAP](https://github.com/ARMmbed/mbed-os/blob/master/drivers/FlashIAP.h) - Flash In-Application Programming (IAP).
 * [Mbed Bootloader](https://github.com/ARMmbed/mbed-bootloader) or a bootloader compatible with Mbed Cloud Client.
-* TCP connection - current Firmware Download client only supports HTTP-download over TCP (this will be resolved in a future release, so that CoAP blockwise transfer will be used for UDP connections).
+* TCP connection - the current Firmware Download client only supports HTTP download over TCP (this will be resolved in a future release, so that CoAP blockwise transfer will be used for UDP connections).
 
 ### References
 
