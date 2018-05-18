@@ -19,7 +19,7 @@ This is a summary of the process for developers to get started and get a device 
 
 ### Mbed CLI tools
 
-1. Import the application in developer's desktop:
+1. Import the application into your desktop:
 
     ```
     mbed import https://os.mbed.com/teams/mbed-os-examples/code/mbed-cloud-example
@@ -39,7 +39,7 @@ This is a summary of the process for developers to get started and get a device 
 
 The hardware requirements for Mbed OS platforms to support Mbed Cloud Client are [here](https://cloud.mbed.com/docs/current/cloud-requirements/index.html).
 
-In general, to start creating a secure connected product, you need a microcontroller that has the following features.
+In general, to start creating a secure connected product, you need a microcontroller that has the following features:
 
 * RAM: 96K or more
 * Flash: 512K or more
@@ -169,7 +169,7 @@ The Ethernet interface is included within Mbed OS, so you do not need to add a l
     status = net.connect();
     ```
 
-4. When the Mbed Cloud Client is started, pass the network interface.
+4. When Mbed Cloud Client is started, pass the network interface.
 
     ```
     SimpleMbedCloudClient client(&net, &sd, &fs);
@@ -220,7 +220,7 @@ This example references the ESP8266 WiFi module, but the instructions are applic
     nsapi_error_t status = net.connect(MBED_CONF_APP_WIFI_SSID, MBED_CONF_APP_WIFI_PASSWORD, NSAPI_SECURITY_WPA_WPA2);
     ```
 
-6. When the Mbed Cloud Client is started, pass the network interface.
+6. When Mbed Cloud Client is started, pass the network interface.
 
     ```cpp
     SimpleMbedCloudClient client(&net, &sd, &fs);
@@ -300,11 +300,41 @@ If you want to change this to an actual button, here is how to do it:
 
 See guide at [TODO]
 
+#### Mbed Cloud Client v1.3.x SOTP-specific changes
+
+Mbed Cloud Client v1.3.x introduces a new feature called Software One-Time Programming (SOTP) that makes use of the internal flash of the MCU as an One-Time-Programmable section. It stores the keys required to decrypt the credentials stored in the persistent storage. Read more on this in the [porting documentation](https://cloud.mbed.com/docs/current/porting/changing-a-customized-porting-layer.html#rtos-module) under the RTOS module section.
+
+The flash must be divided into two sections (default 2, maximum 2) for your target. You need to modify the `mbed_app.json` file as follows:
+
+1. Add a section to the `target_overrides` with SOTP addresses and sizes.
+
+    Here is an example for the NUCLEO_L476RG board. Note that with these flash sectors, the SOTP region is placed at the last two sectors of the flash. You can find the memory map information in the reference manual of your MCU.
+
+    ```json
+        "NUCLEO_L476RG": {
+            "sotp-section-1-address"           : "(0x08000000+((1024-32)*1024))",
+            "sotp-section-1-size"              : "(16*1024)",
+            "sotp-section-2-address"           : "(0x08000000+((1024-16)*1024))",
+            "sotp-section-2-size"              : "(16*1024)",
+            "sotp-num-sections"                : 2
+        }
+    ```
+
+2. Add the macro definition to the "config" section. Note that the address and size macros are already provided. You only need to add the macro for the number of sections:
+
+    ```json
+        "sotp-num-sections": {
+            "help": "Number of SOTP sections",
+            "macro_name": "PAL_INT_FLASH_NUM_SECTIONS",
+            "value": null
+        }
+    ```
+
 ## Enabling firmware updates
 
 To enable firmware updates, a compatible bootloader needs to be added in the `tools/` folder. The process to merge the application with the bootloader currently only works when building with Mbed CLI. In the future, this combine process will be done automatically by Mbed tools.
 
-1. Compile [mbed-bootloader](https://github.com/armmbed/mbed-bootloader) for the platform and storage configuration used in this application. Place the binary in the tools folder.
+1. Compile [mbed-bootloader](https://github.com/armmbed/mbed-bootloader) for the platform and storage configuration used in this application. Place the binary in the `tools` folder.
 
 1. Add a section to `mbed_app.json` under `target_overrides` with the bootloader configuration. For example:
 
