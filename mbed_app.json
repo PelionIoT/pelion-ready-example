@@ -17,7 +17,22 @@
             "update-client.storage-size"     : "(1024*1024*2)",
             "update-client.storage-locations": "1",
             "mbed-trace.enable": null
+        },
+        "K64F": {
+            "sotp-section-1-address"           : "0xFE000",
+            "sotp-section-1-size"              : "0x1000",
+            "sotp-section-2-address"           : "0xFF000",
+            "sotp-section-2-size"              : "0x1000",
+            "sotp-num-sections"                : 2
+        },
+        "K66F": {
+            "sotp-section-1-address"           : "0x1FE000",
+            "sotp-section-1-size"              : "0x1000",
+            "sotp-section-2-address"           : "0x1FF000",
+            "sotp-section-2-size"              : "0x1000",
+            "sotp-num-sections"                : 2
         }
+
     },
     "config": {
         "format-storage-layer-on-error": {
@@ -47,6 +62,11 @@
         "sotp-section-2-size": {
             "help": "Flash sector size for SOTP sector 2",
             "macro_name": "PAL_INTERNAL_FLASH_SECTION_2_SIZE",
+            "value": null
+        },
+        "sotp-num-sections": {
+            "help": "Number of SOTP sections",
+            "macro_name": "PAL_INT_FLASH_NUM_SECTIONS",
             "value": null
         }
     }
