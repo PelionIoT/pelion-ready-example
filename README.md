@@ -115,6 +115,8 @@ For example, if the SPI signals for the SD card interface are connected on an Ar
 SDBlockDevice sd(D11, D12, D13, D10);
 ```
 
+<span class="notes">**Note:** The default mounting point is `sd`. This can be overridden in the `mbed_app.json` file using `PAL_FS_MOUNT_POINT_PRIMARY` and `PAL_FS_MOUNT_POINT_SECONDARY`. See [documentation](https://cloud.mbed.com/docs/current/porting/port-filesystem.html).</span>
+
 ##### For SPI Flash (devices that support SFDP)
 
 <Please note that this section of the document is under construction.  More information is needed.>
