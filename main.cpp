@@ -21,6 +21,7 @@
 #include "SDBlockDevice.h"
 #include "FATFileSystem.h"
 #include "EthernetInterface.h"
+#include "eventOS_scheduler.h"
 
 // An event queue is a very useful structure to debounce information between contexts (e.g. ISR and normal threads)
 // This is great because things such as network operations are illegal in ISR, so updating a resource in a button's fall() function is not allowed
@@ -150,6 +151,8 @@ int main(void) {
     // The timer fires on an interrupt context, but debounces it to the eventqueue, so it's safe to do network operations
     Ticker timer;
     timer.attach(eventQueue.event(&fake_button_press), 5.0);
+
+    eventQueue.call_every(1, &eventOS_scheduler_run_until_idle);
 
     // You can easily run the eventQueue in a separate thread if required
     eventQueue.dispatch_forever();
