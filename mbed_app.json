@@ -16,7 +16,8 @@
             "update-client.storage-address"  : "(1024*1024*64)",
             "update-client.storage-size"     : "(1024*1024*2)",
             "update-client.storage-locations": "1",
-            "mbed-trace.enable": null
+            "mbed-trace.enable": null,
+            "nanostack-hal.event-loop-dispatch-from-application": true
         },
         "K64F": {
             "sotp-section-1-address"           : "0xFE000",
