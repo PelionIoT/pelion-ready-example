@@ -60,26 +60,37 @@ void pattern_updated(MbedCloudClientResource *resource, m2m::String newValue) {
  * @param size Size of the body
  */
 void blink_callback(MbedCloudClientResource *resource, const uint8_t *buffer, uint16_t size) {
-    printf("POST received. Going to blink LED pattern: %s\n", pattern_res->get_value().c_str());
+    m2m::String str = pattern_res->get_value();
+    printf("POST received. Going to blink LED pattern: %s\n", str.c_str());
 
     static DigitalOut augmentedLed(LED1); // LED that is used for blinking the pattern
 
     // Parse the pattern string, and toggle the LED in that pattern
-    string s = std::string(pattern_res->get_value().c_str());
-    size_t i = 0;
-    size_t pos = s.find(':');
-    while (pos != string::npos) {
-        wait_ms(atoi(s.substr(i, pos - i).c_str()));
-        augmentedLed = !augmentedLed;
+    size_t mark = 0; // The first digit of the toggling pattern
+    size_t next_mark = 0; // The next semicolon or the end of the string
 
-        i = ++pos;
-        pos = s.find(':', pos);
+    // First blink
+    augmentedLed = !augmentedLed;
 
-        if (pos == string::npos) {
-            wait_ms(atoi(s.substr(i, s.length()).c_str()));
-            augmentedLed = !augmentedLed;
-        }
+    if( str.empty() ) { 
+        // No pattern, just flip LED once
+        return;
     }
+    
+    do {
+        // Find next semicolon
+        next_mark = str.find(':', mark);
+        if(next_mark == m2m::String::npos) {
+            next_mark = str.size();
+        } 
+
+        uint32_t waiting_time =  atoi(str.substr(mark, next_mark - mark).c_str());
+
+        wait_ms(waiting_time);
+        augmentedLed = !augmentedLed;
+        
+        mark = next_mark + 1;
+    } while (next_mark != str.size());
 }
 
 /**
