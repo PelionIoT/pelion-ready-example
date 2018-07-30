@@ -17,6 +17,8 @@
 // ----------------------------------------------------------------------------
 
 #include "mbed.h"
+#include "mbed-trace/mbed_trace.h"
+#include "mbed-trace-helper.h"
 #include "simple-mbed-cloud-client.h"
 #include "SDBlockDevice.h"
 #include "FATFileSystem.h"
@@ -113,6 +115,18 @@ int main(void) {
     }
 
     printf("Connected to the network successfully. IP address: %s\n", net.get_ip_address());
+
+    // Initialize Mbed Trace for debugging
+    // Create mutex for tracing to avoid broken lines in logs
+    if(!mbed_trace_helper_create_mutex()) {
+        printf("ERROR - Mutex creation for mbed_trace failed!\n");
+        return 1;
+    }
+
+    // Initialize mbed trace
+    (void) mbed_trace_init();
+    mbed_trace_mutex_wait_function_set(mbed_trace_helper_mutex_wait);
+    mbed_trace_mutex_release_function_set(mbed_trace_helper_mutex_release);
 
     // SimpleMbedCloudClient handles registering over LwM2M to Mbed Cloud
     SimpleMbedCloudClient client(&net, &sd, &fs);
