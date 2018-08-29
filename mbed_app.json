@@ -44,7 +44,6 @@
             "help": "Enable Developer mode to skip Factory enrollment",
             "value": 1
         },
-
         "sotp-section-1-address": {
             "help": "Flash sector address for SOTP sector 1",
             "macro_name": "PAL_INTERNAL_FLASH_SECTION_1_ADDRESS",
@@ -70,25 +69,25 @@
             "macro_name": "PAL_INT_FLASH_NUM_SECTIONS",
             "value": null
         },
-		"test-connect-header-file": {
-        	"help": "Name of socket interface for SMCC tests.",
-        	"value": "\"EthernetInterface.h\""
+        "test-connect-header-file": {
+            "help": "Name of socket interface for SMCC tests.",
+            "value": "\"EthernetInterface.h\""
         },
         "test-socket-object": {
-        	"help": "Instantiation of network interface statement for SMCC tests. (variable name must be net)",
-        	"value": "EthernetInterface net"
+            "help": "Instantiation of network interface statement for SMCC tests. (variable name must be net)",
+            "value": "EthernetInterface net"
         },
         "test-socket-connect": {
-        	"help": "Network socket connect statement for SMCC tests.",
-        	"value": "net.connect();"
+            "help": "Network socket connect statement for SMCC tests.",
+            "value": "net.connect();"
         },
         "test-block-device-header-file": {
-        	"help": "Name of block device for SMCC tests.",
-        	"value": "\"SDBlockDevice.h\""
+            "help": "Name of block device for SMCC tests.",
+            "value": "\"SDBlockDevice.h\""
         },
         "test-block-device-object": {
-        	"help": "Block device instantiation for SMCC tests. (variable name must be bd)",
-        	"value": "SDBlockDevice bd(MBED_CONF_APP_SPI_MOSI, MBED_CONF_APP_SPI_MISO, MBED_CONF_APP_SPI_CLK, MBED_CONF_APP_SPI_CS);"
+            "help": "Block device instantiation for SMCC tests. (variable name must be bd)",
+            "value": "SDBlockDevice bd(MBED_CONF_APP_SPI_MOSI, MBED_CONF_APP_SPI_MISO, MBED_CONF_APP_SPI_CLK, MBED_CONF_APP_SPI_CS);"
         }
     }
 }
