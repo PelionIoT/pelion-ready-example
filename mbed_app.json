@@ -23,16 +23,17 @@
             "sotp-section-1-size"              : "0x1000",
             "sotp-section-2-address"           : "0xFF000",
             "sotp-section-2-size"              : "0x1000",
-            "sotp-num-sections"                : 2
+            "sotp-num-sections"                : 2,
+			"test-block-device-object"         : "SDBlockDevice bd(PTE3, PTE1, PTE2, PTE4);"
         },
         "K66F": {
             "sotp-section-1-address"           : "0x1FE000",
             "sotp-section-1-size"              : "0x1000",
             "sotp-section-2-address"           : "0x1FF000",
             "sotp-section-2-size"              : "0x1000",
-            "sotp-num-sections"                : 2
+            "sotp-num-sections"                : 2,
+			"test-block-device-object"         : "SDBlockDevice bd(PTE3, PTE1, PTE2, PTE4);"
         }
-
     },
     "config": {
         "format-storage-layer-on-error": {
@@ -68,6 +69,26 @@
             "help": "Number of SOTP sections",
             "macro_name": "PAL_INT_FLASH_NUM_SECTIONS",
             "value": null
+        },
+		"test-connect-header-file": {
+        	"help": "Name of socket interface for SMCC tests.",
+        	"value": "\"EthernetInterface.h\""
+        },
+        "test-socket-object": {
+        	"help": "Instantiation of network interface statement for SMCC tests. (variable name must be net)",
+        	"value": "EthernetInterface net"
+        },
+        "test-socket-connect": {
+        	"help": "Network socket connect statement for SMCC tests.",
+        	"value": "net.connect();"
+        },
+        "test-block-device-header-file": {
+        	"help": "Name of block device for SMCC tests.",
+        	"value": "\"SDBlockDevice.h\""
+        },
+        "test-block-device-object": {
+        	"help": "Block device instantiation for SMCC tests. (variable name must be bd)",
+        	"value": "SDBlockDevice bd(MBED_CONF_APP_SPI_MOSI, MBED_CONF_APP_SPI_MISO, MBED_CONF_APP_SPI_CLK, MBED_CONF_APP_SPI_CS);"
         }
     }
 }
