@@ -400,6 +400,71 @@ Now, a firmware update can be scheduled as explained in the [Mbed Cloud document
 
 1. When the download completes, the firmware is verified. If everything is OK, the firmware update is applied.
 
+## Testing
+
+### Requirements
+
+Simple Mbed Cloud Client tests rely on the Python SDK to test the end to end solution. 
+
+To install the Python SDK:
+`pip install mbed-cloud-sdk`
+
+**Note:** The Python SDK requires Python 2.7.10+ / Python 3.4.3+, built with SSL support.
+
+### Setup
+
+1. Include the `mbed_cloud_dev_credentials.c` developer certificate in your application. For detailed instructions [see the documentation](https://cloud.mbed.com/docs/current/connecting/provisioning-development-devices.html#creating-and-downloading-a-developer-certificate).
+
+2. Set an environment variable on the host machine called `MBED_CLOUD_API_KEY` which is valid for the account that your device will connect to. For instructions on how to generate an API key, please [see the documentation](https://cloud.mbed.com/docs/current/integrate-web-app/api-keys.html#generating-an-api-key).
+
+3. In your reference application, change the following parameters in `mbed_app.json` to the parameters specific to your platform:
+
+```json      
+"test-connect-header-file": {
+    "help": "Name of socket interface for SMCC tests.",
+    "value": "\"EthernetInterface.h\""
+},
+"test-socket-object": {
+    "help": "Instantiation of network interface statement for SMCC tests. (variable name must be net)",
+    "value": "EthernetInterface net"
+},
+"test-socket-connect": {
+    "help": "Network socket connect statement for SMCC tests.",
+    "value": "net.connect();"
+},
+"test-block-device-header-file": {
+    "help": "Name of block device for SMCC tests.",
+    "value": "\"SDBlockDevice.h\""
+},
+"test-block-device-object": {
+    "help": "Block device instantiation for SMCC tests. (variable name must be bd)",
+    "value": "SDBlockDevice bd(MBED_CONF_APP_SPI_MOSI, MBED_CONF_APP_SPI_MISO, MBED_CONF_APP_SPI_CLK, MBED_CONF_APP_SPI_CS);"
+}
+```
+For example, to run the Simple Mbed Cloud Client tests on a `UBLOX_EVK_ODIN_W2`, you would add the following configuration in `target_overrides`:
+
+```json
+"target_overrides": {
+    "UBLOX_EVK_ODIN_W2": {
+        "app.sotp-section-1-address"    : "(0x081C0000)",
+        "app.sotp-section-1-size"       : "(128*1024)",
+        "app.sotp-section-2-address"    : "(0x081E0000)",
+        "app.sotp-section-2-size"       : "(128*1024)",
+        "test-connect-header-file"      : "\"OdinWiFiInterface.h\"",
+        "test-block-device-header-file" : "\"SDBlockDevice.h\"",
+        "test-socket-object"            : "OdinWiFiInterface net;",
+        "test-socket-connect"           : "net.connect(MBED_CONF_APP_WIFI_SSID, MBED_CONF_APP_WIFI_PASSWORD, NSAPI_SECURITY_WPA_WPA2);",
+        "test-block-device-object"      : "SDBlockDevice bd(D11, D12, D13, D9);"
+    }
+}
+```
+
+4. Run the Simple Mbed Cloud Client tests from the application directory: 
+
+` mbed test -m <platform> -t <toolchain> --app-config mbed_app.json -n simple-mbed-cloud-client-tests-*`
+
+
+
 ## Known issues
 
 Please check the issues reported on github.
