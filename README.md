@@ -458,8 +458,9 @@ For example, to run the Simple Mbed Cloud Client tests on a `UBLOX_EVK_ODIN_W2`,
     }
 }
 ```
+4. You may need to delete your `main.cpp`.
 
-4. Run the Simple Mbed Cloud Client tests from the application directory: 
+5. Run the Simple Mbed Cloud Client tests from the application directory: 
 
 ` mbed test -m <platform> -t <toolchain> --app-config mbed_app.json -n simple-mbed-cloud-client-tests-*`
 
