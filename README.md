@@ -400,24 +400,9 @@ Now, a firmware update can be scheduled as explained in the [Mbed Cloud document
 
 1. When the download completes, the firmware is verified. If everything is OK, the firmware update is applied.
 
-## Testing
+## Testing Configurations
 
-### Requirements
-
-Simple Mbed Cloud Client tests rely on the Python SDK to test the end to end solution. 
-
-To install the Python SDK:
-`pip install mbed-cloud-sdk`
-
-**Note:** The Python SDK requires Python 2.7.10+ / Python 3.4.3+, built with SSL support.
-
-### Setup
-
-1. Include the `mbed_cloud_dev_credentials.c` developer certificate in your application. For detailed instructions [see the documentation](https://cloud.mbed.com/docs/current/connecting/provisioning-development-devices.html#creating-and-downloading-a-developer-certificate).
-
-2. Set an environment variable on the host machine called `MBED_CLOUD_API_KEY` which is valid for the account that your device will connect to. For instructions on how to generate an API key, please [see the documentation](https://cloud.mbed.com/docs/current/integrate-web-app/api-keys.html#generating-an-api-key).
-
-3. In your reference application, change the following parameters in `mbed_app.json` to the parameters specific to your platform:
+Simple Mbed Cloud Client provides Greentea tests to test your platform. In `mbed_app.json` there is an example configuration to pass to these tests, which include the following parameters:
 
 ```json      
 "test-connect-header-file": {
@@ -458,13 +443,6 @@ For example, to run the Simple Mbed Cloud Client tests on a `UBLOX_EVK_ODIN_W2`,
     }
 }
 ```
-4. You may need to delete your `main.cpp`.
-
-5. Run the Simple Mbed Cloud Client tests from the application directory: 
-
-` mbed test -m <platform> -t <toolchain> --app-config mbed_app.json -n simple-mbed-cloud-client-tests-*`
-
-
 
 ## Known issues
 
