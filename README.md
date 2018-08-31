@@ -400,6 +400,50 @@ Now, a firmware update can be scheduled as explained in the [Mbed Cloud document
 
 1. When the download completes, the firmware is verified. If everything is OK, the firmware update is applied.
 
+## Testing Configurations
+
+Simple Mbed Cloud Client provides Greentea tests to test your platform. In `mbed_app.json` there is an example configuration to pass to these tests, which include the following parameters:
+
+```json      
+"test-connect-header-file": {
+    "help": "Name of socket interface for SMCC tests.",
+    "value": "\"EthernetInterface.h\""
+},
+"test-socket-object": {
+    "help": "Instantiation of network interface statement for SMCC tests. (variable name must be net)",
+    "value": "EthernetInterface net"
+},
+"test-socket-connect": {
+    "help": "Network socket connect statement for SMCC tests.",
+    "value": "net.connect();"
+},
+"test-block-device-header-file": {
+    "help": "Name of block device for SMCC tests.",
+    "value": "\"SDBlockDevice.h\""
+},
+"test-block-device-object": {
+    "help": "Block device instantiation for SMCC tests. (variable name must be bd)",
+    "value": "SDBlockDevice bd(MBED_CONF_APP_SPI_MOSI, MBED_CONF_APP_SPI_MISO, MBED_CONF_APP_SPI_CLK, MBED_CONF_APP_SPI_CS);"
+}
+```
+For example, to run the Simple Mbed Cloud Client tests on a `UBLOX_EVK_ODIN_W2`, you would add the following configuration in `target_overrides`:
+
+```json
+"target_overrides": {
+    "UBLOX_EVK_ODIN_W2": {
+        "app.sotp-section-1-address"    : "(0x081C0000)",
+        "app.sotp-section-1-size"       : "(128*1024)",
+        "app.sotp-section-2-address"    : "(0x081E0000)",
+        "app.sotp-section-2-size"       : "(128*1024)",
+        "test-connect-header-file"      : "\"OdinWiFiInterface.h\"",
+        "test-block-device-header-file" : "\"SDBlockDevice.h\"",
+        "test-socket-object"            : "OdinWiFiInterface net;",
+        "test-socket-connect"           : "net.connect(MBED_CONF_APP_WIFI_SSID, MBED_CONF_APP_WIFI_PASSWORD, NSAPI_SECURITY_WPA_WPA2);",
+        "test-block-device-object"      : "SDBlockDevice bd(D11, D12, D13, D9);"
+    }
+}
+```
+
 ## Known issues
 
 Please check the issues reported on github.
