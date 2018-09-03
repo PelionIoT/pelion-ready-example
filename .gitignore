@@ -1,5 +1,6 @@
 BUILD/
 *.pyc
+.DS_Store
 .env
 .cache/
 .pytest_cache/
