@@ -22,7 +22,7 @@ There is a mirror version of the stable (master) template application on [this l
 
 ## Getting started with the application
 
-This is a summary of the process for developers to get started and get a device connected to Mbed Cloud.
+This is a summary of the process for developers to get started and get a device connected to Pelion IoT Device Management.
 
 ### Mbed Online IDE
 
@@ -98,7 +98,7 @@ In this example, an app with an SD card and on-chip Ethernet is taken to a custo
 
 ##### For an SD card
 
-<span class="notes">**Note:** From Mbed OS 5.10+, many block device drivers have been moved to `mbed-os/components/storage/blockdevice/COMPONENT_SD`, although it's possible to use external drivers.</span>
+<span class="notes">**Note:** From Mbed OS 5.10+, many block device drivers have been moved to `mbed-os/components/storage/blockdevice`, therefore the following steps 1-3 can be skipped. For versions of Mbed OS 5.9 and earlier, and thoses cases where you use external drivers, then the steps below are still valid. </span>
 
 
 1. Add the SD card driver (`sd-driver.lib`) if it is not already added.
@@ -316,9 +316,9 @@ If you want to change this to an actual button, here is how to do it:
 1. Rename `fake_button_press` to `real_button_press`.
 
 
-#### Mbed Cloud Client v1.3.x SOTP-specific changes
+#### Pelion Client v1.3.x SOTP-specific changes
 
-Mbed Cloud Client v1.3.x introduces a new feature called Software One-Time Programming (SOTP) that makes use of the internal flash of the MCU as an One-Time-Programmable section. It stores the keys required to decrypt the credentials stored in the persistent storage. Read more on this in the [porting documentation](https://cloud.mbed.com/docs/current/porting/changing-a-customized-porting-layer.html#rtos-module) under the RTOS module section.
+Pelion Client v1.3.x introduces a new feature called Software One-Time Programming (SOTP) that makes use of the internal flash of the MCU as an One-Time-Programmable section. It stores the keys required to decrypt the credentials stored in the persistent storage. Read more on this in the [porting documentation](https://cloud.mbed.com/docs/current/porting/changing-a-customized-porting-layer.html#rtos-module) under the RTOS module section.
 
 The flash must be divided into two sections (default 2, maximum 2) for your target. You need to modify the `mbed_app.json` file as follows:
 
@@ -442,7 +442,7 @@ Follow these steps to generate a manifest, compile and perform a firmware update
 
 ## Automated testing
 
-Simple Mbed Cloud Client provides Greentea tests to test your platform. In `mbed_app.json` there is an example configuration to pass to these tests, which include the following parameters:
+Pelion Client provides Greentea tests to test your platform. In `mbed_app.json` there is an example configuration to pass to these tests, which include the following parameters:
 
 ```json      
 "test-connect-header-file": {
