@@ -357,10 +357,10 @@ TODO: point to official/released versions
 
 For full documentation about bootloaders and firmware update, read the following documents: (TODO: update links to os.mbed.com)
 
-- [Introduccion to bootloaders](https://github.com/ARMmbed/mbed-os-5-docs/blob/401915f8d310ea7cbafd31420f17143d7ecaaaf8/docs/reference/contributing/target/bootloader.md)
-- [Creating and using a bootloader](https://github.com/ARMmbed/mbed-os-5-docs/blob/bfe3f8ac45df8e05caac989ef2ac201a23887695/docs/tutorials/bootloader.md)
+- [Introduccion to bootloaders](https://os.mbed.com/docs/latest/porting/bootloader.html)
+- [Creating and using a bootloader](https://os.mbed.com/docs/latest/tutorials/bootloader.html)
 - [Mbed Bootloader for Pelion IoT Device Management](https://github.com/ARMmbed/mbed-bootloader)
-- [Updating devices with Arm Mbed CLI](https://github.com/ARMmbed/mbed-os-5-docs/blob/6137ca53e4faac5049dd667de0a8137f0c8f2829/docs/tools/offline/cli-device-management.md)
+- [Updating devices with Arm Mbed CLI](https://os.mbed.com/docs/latest/tools/cli-update.html)
   
 This is a summary to use Arm Mbed OS managed bootloaders.
 
