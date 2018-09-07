@@ -10,8 +10,6 @@ It's intended to be forked and customized to add platform-specific features (suc
 
 There is a mirror version of the stable (master) template application on [this location](https://os.mbed.com/teams/mbed-os-examples/code/mbed-cloud-example) to facilitate the fork and publish on os.mbed.com.
 
-    
-
 ## Table of Contents
 
 1. [Getting started with the application](#getting-started-with-the-application)
@@ -27,7 +25,7 @@ This is a summary of the process for developers to get started and get a device 
 ### Mbed Online IDE
 
 1. Import the application into the Online IDE.
-2. Add the API key to establish connection to Mbed Cloud.
+2. Add the API key to establish connection to Pelion Device Management.
 3. Install the developer certificate.
 4. Compile and program.
 
@@ -40,7 +38,7 @@ This is a summary of the process for developers to get started and get a device 
     cd mbed-cloud-example
     ```
 
-2. Download the developer certificate from Mbed Cloud.
+2. Download the developer certificate from the Pelion Device Management [portal](https://portal.mbedcloud.com).
 3. Compile and program:
 
     ```
@@ -68,7 +66,7 @@ Additionally, to use the Pelion Client, the microcontroller needs to support the
 For the Firmware update over the air (FOTA), you need the following:
 
 * [FlashIAP](https://github.com/ARMmbed/mbed-os/blob/master/drivers/FlashIAP.h) - Flash In-Application Programming (IAP).
-* [Mbed Bootloader](https://github.com/ARMmbed/mbed-bootloader) or a bootloader compatible with Mbed Cloud Client.
+* [Mbed Bootloader](https://github.com/ARMmbed/mbed-bootloader) or a bootloader compatible with Pelion Client.
 * TCP connection - the current Firmware Download client only supports HTTP download over TCP (this will be resolved in a future release, so that CoAP blockwise transfer will be used for UDP connections).
 
 ### References
@@ -98,7 +96,7 @@ In this example, an app with an SD card and on-chip Ethernet is taken to a custo
 
 ##### For an SD card
 
-<span class="notes">**Note:** From Mbed OS 5.10+, many block device drivers have been moved to `mbed-os/components/storage/blockdevice`, therefore the following steps 1-3 can be skipped. For versions of Mbed OS 5.9 and earlier, and thoses cases where you use external drivers, then the steps below are still valid. </span>
+<span class="notes">**Note:** From Mbed OS 5.10+, many block device drivers have been moved to `mbed-os/components/storage/blockdevice`, therefore the following steps 1-3 can be skipped. For versions of Mbed OS 5.9 and earlier (and those cases where you use external drivers), the steps below are still valid. </span>
 
 
 1. Add the SD card driver (`sd-driver.lib`) if it is not already added.
@@ -189,7 +187,7 @@ The Ethernet interface is included within Mbed OS, so you do not need to add a l
     status = net.connect();
     ```
 
-4. When Mbed Cloud Client is started, pass the network interface.
+4. When Pelion Client is started, pass the network interface.
 
     ```
     SimpleMbedCloudClient client(&net, &sd, &fs);
@@ -213,7 +211,7 @@ This example references the ESP8266 WiFi module, but the instructions are applic
     #include "ESP8266Interface.h"
     ```
 
-3. Add the driver configuration information in `mbed_app.json` (located at the top level of the Mbed Cloud Connect example project).
+3. Add the driver configuration information in `mbed_app.json` (located at the top level of the Simple Pelion Client example project).
 
     ```json
         "config": {
@@ -240,7 +238,7 @@ This example references the ESP8266 WiFi module, but the instructions are applic
     nsapi_error_t status = net.connect(MBED_CONF_APP_WIFI_SSID, MBED_CONF_APP_WIFI_PASSWORD, NSAPI_SECURITY_WPA_WPA2);
     ```
 
-6. When Mbed Cloud Client is started, pass the network interface.
+6. When Pelion Client is started, pass the network interface.
 
     ```cpp
     SimpleMbedCloudClient client(&net, &sd, &fs);
@@ -422,7 +420,7 @@ Follow these steps to generate a manifest, compile and perform a firmware update
     mbed compile -t <target> -m <toolchain> -c -f
     ```
 
-4. Open a serial terminal, verify the application boots and is able to register to the Pelion cloud service. Write down the `<endpoint ID>`, as it's required to identify the device to perform a firmware update.
+4. Open a serial terminal, verify the application boots and is able to register to the Pelion Device Management service. Write down the `<endpoint ID>`, as it's required to identify the device to perform a firmware update.
 
 5. Update the firmware of the device through Mbed CLI
    
@@ -438,7 +436,7 @@ Follow these steps to generate a manifest, compile and perform a firmware update
     Downloading: [+++- ] 6 %
     ```
 
-    When the download completes, the firmware is verified. If everything is OK, the firmware update is applied, the device reboots and attemps to connect to Pelion cloud again. The `<endpoint ID>` should be preserved.
+    When the download completes, the firmware is verified. If everything is OK, the firmware update is applied, the device reboots and attemps to connect to Pelion Device Management service again. The `<endpoint ID>` should be preserved.
 
 ## Automated testing
 
@@ -466,7 +464,7 @@ Pelion Client provides Greentea tests to test your platform. In `mbed_app.json` 
     "value": "SDBlockDevice bd(MBED_CONF_APP_SPI_MOSI, MBED_CONF_APP_SPI_MISO, MBED_CONF_APP_SPI_CLK, MBED_CONF_APP_SPI_CS);"
 }
 ```
-For example, to run the Simple Mbed Cloud Client tests on a `UBLOX_EVK_ODIN_W2`, you would add the following configuration in `target_overrides`:
+For example, to run the Simple Pelion Client tests on a `UBLOX_EVK_ODIN_W2`, you would add the following configuration in `target_overrides`:
 
 ```json
 "target_overrides": {
