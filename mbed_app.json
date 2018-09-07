@@ -19,6 +19,7 @@
             "mbed-trace.enable": null
         },
         "K64F": {
+            "target.features_add"              : ["BOOTLOADER"],
             "sotp-section-1-address"           : "0xFE000",
             "sotp-section-1-size"              : "0x1000",
             "sotp-section-2-address"           : "0xFF000",
@@ -27,6 +28,7 @@
             "test-block-device-object"         : "SDBlockDevice bd(PTE3, PTE1, PTE2, PTE4);"
         },
         "K66F": {
+            "target.features_add"              : ["BOOTLOADER"],
             "sotp-section-1-address"           : "0x1FE000",
             "sotp-section-1-size"              : "0x1000",
             "sotp-section-2-address"           : "0x1FF000",
