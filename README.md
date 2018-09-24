@@ -94,11 +94,44 @@ In this example, an app with an SD card and on-chip Ethernet is taken to a custo
 
 #### Changing the storage option
 
-<span class="notes">**Note:** From Mbed OS 5.10+, block device drivers have been moved to `mbed-os/components/storage/blockdevice` and platforms have a default block device interface, therefore this section can be skipped. If you wish to override the default configuration, you can add the configuration into the `mbed_app.json` file.
+<span class="notes">**Note:** From Mbed OS 5.10+, block device drivers have been moved to `mbed-os/components/storage/blockdevice` and many platforms have a default block device interface. </span>
 
-For versions of Mbed OS 5.9 and earlier (and those cases where you use external drivers), the steps below are still valid. </span>
+##### Non-default storage configuration
 
-##### For an SD card
+If you wish to override the default storage configuration or add support for storage, you can add the configuration into the `mbed_app.json` file. For example:
+
+    ```json
+        "NUCLEO_F429ZI": {
+            "target.features_add"  : ["STORAGE"],
+            "target.components_add": ["SD"],
+            "sd.SPI_MOSI"  : "PE_6",
+            "sd.SPI_MISO"  : "PE_5",
+            "sd.SPI_CLK"   : "PE_2",
+            "sd.SPI_CS"    : "PE_4"
+        }
+    ```
+
+##### Example of default storage configuration using Mbed OS 5.10+
+
+1. Include the header files for the FAT file system:
+
+    ```cpp
+    #include "FATFileSystem.h"
+    ```
+
+2. Declare the global object for the default block device driver 
+
+    ```cpp
+    BlockDevice* bd = BlockDevice::get_default_instance();
+    ```
+
+3. Declare the global objects for the file system.
+
+    ```cpp
+    FATFileSystem fs("sd", bd);
+    ```
+
+##### Example of SD card configuration using Mbed OS 5.9 and older
 
 1. Add the SD card driver (`sd-driver.lib`) if it is not already added.
 
@@ -108,16 +141,14 @@ For versions of Mbed OS 5.9 and earlier (and those cases where you use external 
     mbed add https://github.com/armmbed/sd-driver
     ```
 
-2. In the online compiler, click **Import**, then click here to import from URL.
-3. Then enter https://github.com/armmbed/sd-driver for the **Source URL** and **Import As:** Library.
-4. Include the header files for the SD driver and FAT file system:
+2. Include the header files for the SD driver and FAT file system:
 
     ```cpp
     #include "SDBlockDevice.h"
     #include "FATFileSystem.h"
     ```
 
-5. Declare the global objects for the SD card and file system.
+3. Declare the global objects for the SD card and file system.
 
     ```cpp
     SDBlockDevice bd(SPI_MOSI, SPI_MISO, SPI_CLK, SPI_CS);
@@ -166,44 +197,58 @@ SDBlockDevice sd(D11, D12, D13, D10);
 
 #### Changing the network interface
 
-<span class="notes">**Note:** From Mbed OS 5.10+, platforms have a default network interface defined in `mbed-os/targets/targets.json`, therefore this section can be skipped. If you wish to override the default configuration, you can add the configuration into the `mbed_app.json` file.
+<span class="notes">**Note:** From Mbed OS 5.10, platforms have a default network interface defined in `mbed-os/targets/targets.json`. If you wish to override the default configuration, you can add the configuration into the `mbed_app.json` file.
 
-For versions of Mbed OS 5.9 and earlier (and those cases where you use a different network interface), the steps below are still valid. </span>
+##### Example of network initialization for Ethernet using Mbed OS 5.10+
 
-##### For Ethernet
+1. Declare the network interface object.
+   
+    ```
+    EthernetInterface * net = NetworkInterface::get_default_instance();
+    ```
+
+2. Connect the interface.
+   
+    ```
+    status = net->connect();
+    ```
+
+3. When Pelion Client is started, pass the network interface.
+   
+    ```
+    SimpleMbedCloudClient client(net, &sd, &fs);
+    ```
+
+##### Example of network initialization for Ethernet using Mbed OS 5.9 and older versions
 
 The Ethernet interface is included within Mbed OS, so you do not need to add a library.
 
 1. Include the header file for the interface.
-
     ```
     #include "EthernetInterface.h"
     ```
 
 2. Declare the network interface object.
-
     ```
     EthernetInterface net;
     ```
 
 3. Connect the interface.
-
     ```
     status = net.connect();
     ```
 
 4. When Pelion Client is started, pass the network interface.
-
     ```
     SimpleMbedCloudClient client(&net, &sd, &fs);
     ```
 
-##### For WiFi
+##### Example of network initialization for WiFi using Mbed OS 5.9 and older versions
 
 This example references the ESP8266 WiFi module, but the instructions are applicable to other modules.
 
 1. Add the ESP8266 WiFi interface driver (esp8266-driver) if it is not already added.
-
+   
     ```
     mbed add https://github.com/ARMmbed/esp8266-driver
     ```
@@ -211,31 +256,31 @@ This example references the ESP8266 WiFi module, but the instructions are applic
     <span class="notes">**Note:** You may have to update the firmware inside the ESP8266 module.</span>
 
 2. Include the header file for the interface.
-
+   
     ```cpp
     #include "ESP8266Interface.h"
     ```
 
 3. Declare the network interface object.
-
+   
     ```cpp
     ESP8266Interface net(D1, D0);
     ```
 
 4. Connect the interface.
-
+   
     ```cpp
     nsapi_error_t status = net.connect(MBED_CONF_APP_WIFI_SSID, MBED_CONF_APP_WIFI_PASSWORD, NSAPI_SECURITY_WPA_WPA2);
     ```
 
 5. When Pelion Client is started, pass the network interface.
-
+   
     ```cpp
     SimpleMbedCloudClient client(&net, &sd, &fs);
     ```
 
 6. Add the WiFi credentials information in `mbed_app.json` (located at the top level of the Simple Pelion Client example project).
-
+   
     ```json
         "config": {
             "wifi-ssid": {
@@ -309,14 +354,14 @@ If you want to change this to an actual button, here is how to do it:
     timer.attach(eventQueue.event(&fake_button_press), 5.0);
     ```
 
-1. Declare an `InterruptIn` object on the button, and attach the callback function to the `fall` handler:
+2. Declare an `InterruptIn` object on the button, and attach the callback function to the `fall` handler:
 
     ```cpp
     InterruptIn btn(BUTTON1);
     btn.fall(eventQueue.event(&fake_button_press), 5.0);
     ```
 
-1. Rename `fake_button_press` to `real_button_press`.
+3. Rename `fake_button_press` to `real_button_press`.
 
 
 #### Pelion Client v1.3.x SOTP-specific changes
