@@ -346,12 +346,7 @@ The flash must be divided into two sections (default 2, maximum 2) for your targ
 
 ## Enabling firmware updates
 
-Mbed OS 5.10+ and Mbed CLI 1.7.6+ simplifies the process to enable and perform Firmware Updates. Here is a summary on how to configure the device and verify its correct behaviour.
-
-<span class="notes">**Note:**At the time of writting this document, we've used an unreleased version of Mbed CLI an Mbed OS from the master branch:
-
-TODO: point to official/released versions
-</span>
+Mbed OS 5.10 and Mbed CLI 1.8 simplifies the process to enable and perform Firmware Updates. Here is a summary on how to configure the device and verify its correct behaviour.
 
 For full documentation about bootloaders and firmware update, read the following documents: (TODO: update links to os.mbed.com)
 
