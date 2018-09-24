@@ -228,12 +228,31 @@ If you wish to override the default network configuration, you can add the confi
     ```
     status = net->connect();
     ```
-
+    
 3. When Pelion Client is started, pass the network interface.
-   
     ```
     SimpleMbedCloudClient client(net, &sd, &fs);
     ```
+
+##### Example of network initialization for WiFi using Mbed OS 5.10+
+
+1. Declare the network interface object.
+   
+    ```
+    WiFiInterface *net = WiFiInterface::get_default_instance();
+    ```
+
+2. Connect the interface.
+   
+    ```
+    status  = net->connect(MBED_CONF_APP_WIFI_SSID, MBED_CONF_APP_WIFI_PASSWORD, NSAPI_SECURITY_WPA_WPA2);
+    ```
+
+3. When Pelion Client is started, pass the network interface.
+    ```
+    SimpleMbedCloudClient client(net, &sd, &fs);
+    ```
+
 
 ##### Example of network initialization for Ethernet using Mbed OS 5.9 and older versions
 
