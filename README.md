@@ -94,10 +94,11 @@ In this example, an app with an SD card and on-chip Ethernet is taken to a custo
 
 #### Changing the storage option
 
+<span class="notes">**Note:** From Mbed OS 5.10+, block device drivers have been moved to `mbed-os/components/storage/blockdevice` and platforms have a default block device interface, therefore this section can be skipped. If you wish to override the default configuration, you can add the configuration into the `mbed_app.json` file.
+
+For versions of Mbed OS 5.9 and earlier (and those cases where you use external drivers), the steps below are still valid. </span>
+
 ##### For an SD card
-
-<span class="notes">**Note:** From Mbed OS 5.10+, many block device drivers have been moved to `mbed-os/components/storage/blockdevice`, therefore the following steps 1-3 can be skipped. For versions of Mbed OS 5.9 and earlier (and those cases where you use external drivers), the steps below are still valid. </span>
-
 
 1. Add the SD card driver (`sd-driver.lib`) if it is not already added.
 
@@ -165,6 +166,10 @@ SDBlockDevice sd(D11, D12, D13, D10);
 
 #### Changing the network interface
 
+<span class="notes">**Note:** From Mbed OS 5.10+, platforms have a default network interface defined in `mbed-os/targets/targets.json`, therefore this section can be skipped. If you wish to override the default configuration, you can add the configuration into the `mbed_app.json` file.
+
+For versions of Mbed OS 5.9 and earlier (and those cases where you use a different network interface), the steps below are still valid. </span>
+
 ##### For Ethernet
 
 The Ethernet interface is included within Mbed OS, so you do not need to add a library.
@@ -211,7 +216,25 @@ This example references the ESP8266 WiFi module, but the instructions are applic
     #include "ESP8266Interface.h"
     ```
 
-3. Add the driver configuration information in `mbed_app.json` (located at the top level of the Simple Pelion Client example project).
+3. Declare the network interface object.
+
+    ```cpp
+    ESP8266Interface net(D1, D0);
+    ```
+
+4. Connect the interface.
+
+    ```cpp
+    nsapi_error_t status = net.connect(MBED_CONF_APP_WIFI_SSID, MBED_CONF_APP_WIFI_PASSWORD, NSAPI_SECURITY_WPA_WPA2);
+    ```
+
+5. When Pelion Client is started, pass the network interface.
+
+    ```cpp
+    SimpleMbedCloudClient client(&net, &sd, &fs);
+    ```
+
+6. Add the WiFi credentials information in `mbed_app.json` (located at the top level of the Simple Pelion Client example project).
 
     ```json
         "config": {
@@ -224,24 +247,6 @@ This example references the ESP8266 WiFi module, but the instructions are applic
                 "value": "\"PASSWORD\""
             }
         }
-    ```
-
-4. Declare the network interface object.
-
-    ```cpp
-    ESP8266Interface net(D1, D0);
-    ```
-
-5. Connect the interface.
-
-    ```cpp
-    nsapi_error_t status = net.connect(MBED_CONF_APP_WIFI_SSID, MBED_CONF_APP_WIFI_PASSWORD, NSAPI_SECURITY_WPA_WPA2);
-    ```
-
-6. When Pelion Client is started, pass the network interface.
-
-    ```cpp
-    SimpleMbedCloudClient client(&net, &sd, &fs);
     ```
 
 #### Changing the target MCU
@@ -363,6 +368,8 @@ If Mbed OS contains a default pre-built bootloader in `mbed-os/feature/FEATURE_B
 
 Otherwise, you'll need to compile the [mbed-bootloader](https://github.com/armmbed/mbed-bootloader) and add it to your application. Once it's done, we recommend to send a Pull-Requests to [Mbed OS](https://github.com/ARMmbed/mbed-os) to contribute with a default bootloader for your Mbed Enabled platform.
 
+<span class="notes">**Note:** Make sure the configuration in the `mbed-bootloader/mbed_app.json` corresponds with the configuration in your application's `mbed_app.json`, otherwise the bootloader will not be able to apply the new firmware.</span>
+
 #### Enabling the application to use a bootloader 
 
 - Option 1: default & prebuilt bootloader
@@ -379,7 +386,7 @@ Otherwise, you'll need to compile the [mbed-bootloader](https://github.com/armmb
     }
     ```
 
-- Option 2: custom bootlaoder
+- Option 2: custom bootloader
 
     If you'd like to overide a default bootloader or use a custom one available in the application, then indicate the path to the booloader in the  `mbed_app.json`. For example:
 
@@ -435,47 +442,11 @@ Follow these steps to generate a manifest, compile and perform a firmware update
 
 ## Automated testing
 
-Pelion Client provides Greentea tests to test your platform. In `mbed_app.json` there is an example configuration to pass to these tests, which include the following parameters:
+The Simple Pelion Client provides Greentea tests to confirm your platform works as expected. The network and storage configuration is already defined in Mbed OS 5.10, but you may want to override the configuration in `mbed_app.json`.
 
-```json      
-"test-connect-header-file": {
-    "help": "Name of socket interface for SMCC tests.",
-    "value": "\"EthernetInterface.h\""
-},
-"test-socket-object": {
-    "help": "Instantiation of network interface statement for SMCC tests. (variable name must be net)",
-    "value": "EthernetInterface net"
-},
-"test-socket-connect": {
-    "help": "Network socket connect statement for SMCC tests.",
-    "value": "net.connect();"
-},
-"test-block-device-header-file": {
-    "help": "Name of block device for SMCC tests.",
-    "value": "\"SDBlockDevice.h\""
-},
-"test-block-device-object": {
-    "help": "Block device instantiation for SMCC tests. (variable name must be bd)",
-    "value": "SDBlockDevice bd(MBED_CONF_APP_SPI_MOSI, MBED_CONF_APP_SPI_MISO, MBED_CONF_APP_SPI_CLK, MBED_CONF_APP_SPI_CS);"
-}
-```
-For example, to run the Simple Pelion Client tests on a `UBLOX_EVK_ODIN_W2`, you would add the following configuration in `target_overrides`:
+For details on Simple Pelion Client testing, refer to the documentation [here](https://github.com/ARMmbed/simple-mbed-cloud-client/tree/def_network#tests).
 
-```json
-"target_overrides": {
-    "UBLOX_EVK_ODIN_W2": {
-        "app.sotp-section-1-address"    : "(0x081C0000)",
-        "app.sotp-section-1-size"       : "(128*1024)",
-        "app.sotp-section-2-address"    : "(0x081E0000)",
-        "app.sotp-section-2-size"       : "(128*1024)",
-        "test-connect-header-file"      : "\"OdinWiFiInterface.h\"",
-        "test-block-device-header-file" : "\"SDBlockDevice.h\"",
-        "test-socket-object"            : "OdinWiFiInterface net;",
-        "test-socket-connect"           : "net.connect(MBED_CONF_APP_WIFI_SSID, MBED_CONF_APP_WIFI_PASSWORD, NSAPI_SECURITY_WPA_WPA2);",
-        "test-block-device-object"      : "SDBlockDevice bd(D11, D12, D13, D9);"
-    }
-}
-```
+This template application contains a working application and tests passing for the `K64F` and `K66F` platforms.
 
 ## Known issues
 
