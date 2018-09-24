@@ -100,16 +100,16 @@ In this example, an app with an SD card and on-chip Ethernet is taken to a custo
 
 If you wish to override the default storage configuration or add support for storage, you can add the configuration into the `mbed_app.json` file. For example:
 
-    ```json
-        "NUCLEO_F429ZI": {
-            "target.features_add"  : ["STORAGE"],
-            "target.components_add": ["SD"],
-            "sd.SPI_MOSI"  : "PE_6",
-            "sd.SPI_MISO"  : "PE_5",
-            "sd.SPI_CLK"   : "PE_2",
-            "sd.SPI_CS"    : "PE_4"
-        }
-    ```
+```json
+    "NUCLEO_F429ZI": {
+        "target.features_add"  : ["STORAGE"],
+        "target.components_add": ["SD"],
+        "sd.SPI_MOSI"  : "PE_6",
+        "sd.SPI_MISO"  : "PE_5",
+        "sd.SPI_CLK"   : "PE_2",
+        "sd.SPI_CS"    : "PE_4"
+    }
+```
 
 ##### Example of default storage configuration using Mbed OS 5.10+
 
@@ -197,7 +197,23 @@ SDBlockDevice sd(D11, D12, D13, D10);
 
 #### Changing the network interface
 
-<span class="notes">**Note:** From Mbed OS 5.10, platforms have a default network interface defined in `mbed-os/targets/targets.json`. If you wish to override the default configuration, you can add the configuration into the `mbed_app.json` file.
+<span class="notes">**Note:** From Mbed OS 5.10, platforms have a default network interface defined in `mbed-os/targets/targets.json`. If you wish to override the default configuration, you can add the configuration into the `mbed_app.json` file.</span>
+
+##### Non-default network configuration
+
+If you wish to override the default network configuration, you can add the configuration into the `mbed_app.json` file. For example:
+
+```json
+    "NUCLEO_F429ZI": {
+        "target.network-default-interface-type" : "WIFI",
+        "esp8266.rx"                            : "D0",
+        "esp8266.tx"                            : "D1",
+        "esp8266.provide-default"               : true,
+        "nsapi.default-wifi-security"           : "WPA_WPA2",
+        "nsapi.default-wifi-ssid"               : "\"SSID\"",
+        "nsapi.default-wifi-password"          : "\"Password\""
+    }
+```
 
 ##### Example of network initialization for Ethernet using Mbed OS 5.10+
 
