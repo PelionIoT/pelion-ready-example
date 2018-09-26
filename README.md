@@ -228,7 +228,7 @@ If you wish to override the default network configuration, you can add the confi
     ```
     status = net->connect();
     ```
-    
+
 3. When Pelion Client is started, pass the network interface.
     ```
     SimpleMbedCloudClient client(net, &sd, &fs);
@@ -433,10 +433,11 @@ The flash must be divided into two sections (default 2, maximum 2) for your targ
 
 Mbed OS 5.10 and Mbed CLI 1.8 simplifies the process to enable and perform Firmware Updates. Here is a summary on how to configure the device and verify its correct behaviour.
 
-For full documentation about bootloaders and firmware update, read the following documents: (TODO: update links to os.mbed.com)
+For full documentation about bootloaders and firmware update, read the following documents:
 
 - [Introduccion to bootloaders](https://os.mbed.com/docs/latest/porting/bootloader.html)
 - [Creating and using a bootloader](https://os.mbed.com/docs/latest/tutorials/bootloader.html)
+- [Bootloader configuration in Mbed OS](https://os.mbed.com/docs/latest/tools/configuring-tools.html)
 - [Mbed Bootloader for Pelion IoT Device Management](https://github.com/ARMmbed/mbed-bootloader)
 - [Updating devices with Arm Mbed CLI](https://os.mbed.com/docs/latest/tools/cli-update.html)
   
@@ -468,15 +469,19 @@ Otherwise, you'll need to compile the [mbed-bootloader](https://github.com/armmb
 
 - Option 2: custom bootloader
 
-    If you'd like to overide a default bootloader or use a custom one available in the application, then indicate the path to the booloader in the  `mbed_app.json`. For example:
+    If you'd like to overide a default bootloader or use a custom one available in the application, then indicate the path to the booloader, `app_offset` and `header_offset` parameters in `mbed_app.json`. For example:
 
     ```
     "target_overrides": {
             "K64F": {
+                "target.app_offset": "0xa400",
+                "target.header_offset": "0xa000",
                 "target.bootloader_img": "bootloader/my_bootloader.bin"
             }
         }
     ```
+
+    You may need to specify `header_format` as well. You could include the default header format from [Mbed OS](https://github.com/ARMmbed/mbed-os/blob/master/features/FEATURE_BOOTLOADER/mbed_lib.json) by adding `"target.features_add": ["BOOTLOADER"]`.
 
 #### Verifying that firmware update works
 
@@ -493,7 +498,7 @@ Follow these steps to generate a manifest, compile and perform a firmware update
 2. Initialize the device management feature 
 
     ```
-    mbed dm init -d "company.com" --model-name "product-model" -q
+    mbed dm init -d "company.com" --model-name "product-model" -q --force
     ```
 
 3. Compile the application, include the firware update credentials generated before, merge with the bootloader and program the device
