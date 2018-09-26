@@ -25,7 +25,6 @@
             "sotp-section-2-address"           : "(36*1024)",
             "sotp-section-2-size"              : "(4*1024)",
             "sotp-num-sections"                : 2,
-            "update-client.bootloader-details" : "0x00007188",
             "update-client.application-details": "(40*1024)"
         },
         "K66F": {
@@ -35,8 +34,23 @@
             "sotp-section-2-address"           : "(36*1024)",
             "sotp-section-2-size"              : "(4*1024)",
             "sotp-num-sections"                : 2,
-            "update-client.bootloader-details" : "0x00007188",
             "update-client.application-details": "(40*1024)"
+        },
+        "NUCLEO_F429ZI": {
+            "target.features_add"  : ["STORAGE", "BOOTLOADER"],
+            "target.app_offset": "0x10400",
+            "target.header_offset": "0x10000",
+            "target.bootloader_img": "bootloader/mbed-bootloader-F429ZI.bin",
+            "target.components_add": ["SD"],
+            "sd.SPI_MOSI"  : "PE_6",
+            "sd.SPI_MISO"  : "PE_5",
+            "sd.SPI_CLK"   : "PE_2",
+            "sd.SPI_CS"    : "PE_4",
+            "update-client.application-details"     : "(0x08000000+64*1024)",
+            "app.sotp-section-1-address": "(0x081C0000)",
+            "app.sotp-section-1-size"   : "(128*1024)",
+            "app.sotp-section-2-address": "(0x081E0000)",
+            "app.sotp-section-2-size"   : "(128*1024)"
         }
     },
     "config": {
