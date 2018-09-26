@@ -449,6 +449,8 @@ If Mbed OS contains a default pre-built bootloader in `mbed-os/feature/FEATURE_B
 
 Otherwise, you'll need to compile the [mbed-bootloader](https://github.com/armmbed/mbed-bootloader) and add it to your application. Once it's done, we recommend to send a Pull-Requests to [Mbed OS](https://github.com/ARMmbed/mbed-os) to contribute with a default bootloader for your Mbed Enabled platform.
 
+You can see an example of bootloader configuration for the `NUCLEO_F429ZI` in `bootloader/mbed_app.json`. This is compatible with the `mbed_app.json` configuration in this template application.
+
 <span class="notes">**Note:** Make sure the configuration in the `mbed-bootloader/mbed_app.json` corresponds with the configuration in your application's `mbed_app.json`, otherwise the bootloader will not be able to apply the new firmware.</span>
 
 #### Enabling the application to use a bootloader 
