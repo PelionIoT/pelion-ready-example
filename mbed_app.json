@@ -5,7 +5,7 @@
         "MBED_CLIENT_USER_CONFIG_FILE=\"mbed_cloud_client_user_config.h\"",
         "MBED_CLOUD_CLIENT_USER_CONFIG_FILE=\"mbed_cloud_client_user_config.h\"",
         "PAL_DTLS_PEER_MIN_TIMEOUT=5000",
-        "MBED_CONF_APP_MAIN_STACK_SIZE=4608",
+        "MBED_CONF_APP_MAIN_STACK_SIZE=6000",
         "ARM_UC_USE_PAL_BLOCKDEVICE=1",
         "MBED_CLOUD_CLIENT_UPDATE_STORAGE=ARM_UCP_FLASHIAP_BLOCKDEVICE"
     ],
@@ -19,20 +19,39 @@
             "mbed-trace.enable": null
         },
         "K64F": {
-            "sotp-section-1-address"           : "0xFE000",
-            "sotp-section-1-size"              : "0x1000",
-            "sotp-section-2-address"           : "0xFF000",
-            "sotp-section-2-size"              : "0x1000",
-            "sotp-num-sections"                : 2
+            "target.features_add"              : ["BOOTLOADER"],
+            "sotp-section-1-address"           : "(32*1024)",
+            "sotp-section-1-size"              : "(4*1024)",
+            "sotp-section-2-address"           : "(36*1024)",
+            "sotp-section-2-size"              : "(4*1024)",
+            "sotp-num-sections"                : 2,
+            "update-client.application-details": "(40*1024)"
         },
         "K66F": {
-            "sotp-section-1-address"           : "0x1FE000",
-            "sotp-section-1-size"              : "0x1000",
-            "sotp-section-2-address"           : "0x1FF000",
-            "sotp-section-2-size"              : "0x1000",
-            "sotp-num-sections"                : 2
+            "target.features_add"              : ["BOOTLOADER"],
+            "sotp-section-1-address"           : "(32*1024)",
+            "sotp-section-1-size"              : "(4*1024)",
+            "sotp-section-2-address"           : "(36*1024)",
+            "sotp-section-2-size"              : "(4*1024)",
+            "sotp-num-sections"                : 2,
+            "update-client.application-details": "(40*1024)"
+        },
+        "NUCLEO_F429ZI": {
+            "target.features_add"  : ["STORAGE", "BOOTLOADER"],
+            "target.app_offset": "0x10400",
+            "target.header_offset": "0x10000",
+            "target.bootloader_img": "bootloader/mbed-bootloader-F429ZI.bin",
+            "target.components_add": ["SD"],
+            "sd.SPI_MOSI"  : "PE_6",
+            "sd.SPI_MISO"  : "PE_5",
+            "sd.SPI_CLK"   : "PE_2",
+            "sd.SPI_CS"    : "PE_4",
+            "update-client.application-details"     : "(0x08000000+64*1024)",
+            "app.sotp-section-1-address": "(0x081C0000)",
+            "app.sotp-section-1-size"   : "(128*1024)",
+            "app.sotp-section-2-address": "(0x081E0000)",
+            "app.sotp-section-2-size"   : "(128*1024)"
         }
-
     },
     "config": {
         "format-storage-layer-on-error": {
@@ -43,7 +62,6 @@
             "help": "Enable Developer mode to skip Factory enrollment",
             "value": 1
         },
-
         "sotp-section-1-address": {
             "help": "Flash sector address for SOTP sector 1",
             "macro_name": "PAL_INTERNAL_FLASH_SECTION_1_ADDRESS",
