@@ -20,12 +20,12 @@ There is a mirror version of the stable (master) template application on [this l
 
 ## Getting started with the application
 
-This is a summary of the process for developers to get started and get a device connected to Pelion IoT Device Management.
+This is a summary of the process for developers to get started and get a device connected to Pelion Device Management Client.
 
 ### Mbed Online IDE
 
 1. Import the application into the Online IDE.
-2. Add the API key to establish connection to Pelion Device Management.
+2. Add the API key to establish connection.
 3. Install the developer certificate.
 4. Compile and program.
 
@@ -58,15 +58,15 @@ In general, to start creating a secure connected product, you need a microcontro
 * True Random Number Generator (TRNG)
 * Real Time Clock (RTC)
 
-Additionally, to use the Pelion Client, the microcontroller needs to support the following in Mbed OS (latest version preferred) or in a compatible driver library:
+Additionally, to use the Device Management Client, the microcontroller needs to support the following in Mbed OS (latest version preferred) or in a compatible driver library:
 
 * A storage device (SDcard, SPI Flash, Data Flash)
-* IP connectivity (Ethernet, WiFi, Cellular, 6LoWPAN, Thread)
+* IP connectivity (Ethernet, Wi-Fi, Cellular, 6LoWPAN, Thread)
 
 For the Firmware update over the air (FOTA), you need the following:
 
 * [FlashIAP](https://github.com/ARMmbed/mbed-os/blob/master/drivers/FlashIAP.h) - Flash In-Application Programming (IAP).
-* [Mbed Bootloader](https://github.com/ARMmbed/mbed-bootloader) or a bootloader compatible with Pelion Client.
+* [Mbed Bootloader](https://github.com/ARMmbed/mbed-bootloader) or a compatible bootloader.
 * TCP connection - the current Firmware Download client only supports HTTP download over TCP (this will be resolved in a future release, so that CoAP blockwise transfer will be used for UDP connections).
 
 ### References
@@ -119,13 +119,13 @@ If you wish to override the default storage configuration or add support for sto
     #include "FATFileSystem.h"
     ```
 
-2. Declare the global object for the default block device driver 
+2. Declare the global object for the default block device driver:
 
     ```cpp
     BlockDevice* bd = BlockDevice::get_default_instance();
     ```
 
-3. Declare the global objects for the file system.
+3. Declare the global objects for the file system:
 
     ```cpp
     FATFileSystem fs("sd", bd);
@@ -133,9 +133,7 @@ If you wish to override the default storage configuration or add support for sto
 
 ##### Example of SD card configuration using Mbed OS 5.9 and older
 
-1. Add the SD card driver (`sd-driver.lib`) if it is not already added.
-
-    On the command line:
+1. Add the SD card driver (`sd-driver.lib`) if it is not already added. On the command line:
 
     ```
     mbed add https://github.com/armmbed/sd-driver
@@ -148,7 +146,7 @@ If you wish to override the default storage configuration or add support for sto
     #include "FATFileSystem.h"
     ```
 
-3. Declare the global objects for the SD card and file system.
+3. Declare the global objects for the SD card and file system:
 
     ```cpp
     SDBlockDevice bd(SPI_MOSI, SPI_MISO, SPI_CLK, SPI_CS);
@@ -169,13 +167,13 @@ SDBlockDevice sd(D11, D12, D13, D10);
 
 <Please note that this section of the document is under construction.  More information is needed.>
 
-1. Add the SPI Flash driver (`spif-driver`) if it is not already added.
+1. Add the SPI Flash driver (`spif-driver`) if it is not already added:
 
     ```
     mbed add https://github.com/armmbed/spif-driver
     ```
 
-2. Include the header files for the SPI Flash driver and LitteFS file system. For SPI Flash, we recommend LittleFS file system which supports wear leveling.
+2. Include the header files for the SPI Flash driver and LitteFS file system. For SPI Flash, we recommend LittleFS file system which supports wear leveling:
 
     ```cpp
     #include "SPIFBlockDevice.h"
@@ -217,38 +215,39 @@ If you wish to override the default network configuration, you can add the confi
 
 ##### Example of network initialization for Ethernet using Mbed OS 5.10+
 
-1. Declare the network interface object.
+1. Declare the network interface object:
    
     ```
     EthernetInterface * net = NetworkInterface::get_default_instance();
     ```
 
-2. Connect the interface.
+2. Connect the interface:
    
     ```
     status = net->connect();
     ```
 
-3. When Pelion Client is started, pass the network interface.
+3. When the Client is started, pass the network interface:
     ```
     SimpleMbedCloudClient client(net, &sd, &fs);
     ```
 
-##### Example of network initialization for WiFi using Mbed OS 5.10+
+##### Example of network initialization for Wi-Fi using Mbed OS 5.10+
 
-1. Declare the network interface object.
+1. Declare the network interface object:
    
     ```
     WiFiInterface *net = WiFiInterface::get_default_instance();
     ```
 
-2. Connect the interface.
+2. Connect the interface:
    
     ```
     status  = net->connect(MBED_CONF_APP_WIFI_SSID, MBED_CONF_APP_WIFI_PASSWORD, NSAPI_SECURITY_WPA_WPA2);
     ```
 
-3. When Pelion Client is started, pass the network interface.
+3. When the Client is started, pass the network interface:
+
     ```
     SimpleMbedCloudClient client(net, &sd, &fs);
     ```
@@ -258,31 +257,35 @@ If you wish to override the default network configuration, you can add the confi
 
 The Ethernet interface is included within Mbed OS, so you do not need to add a library.
 
-1. Include the header file for the interface.
+1. Include the header file for the interface:
+
     ```
     #include "EthernetInterface.h"
     ```
 
-2. Declare the network interface object.
+2. Declare the network interface object:
+
     ```
     EthernetInterface net;
     ```
 
-3. Connect the interface.
+3. Connect the interface:
+
     ```
     status = net.connect();
     ```
 
-4. When Pelion Client is started, pass the network interface.
+4. When the Client is started, pass the network interface:
+
     ```
     SimpleMbedCloudClient client(&net, &sd, &fs);
     ```
 
-##### Example of network initialization for WiFi using Mbed OS 5.9 and older versions
+##### Example of network initialization for Wi-Fi using Mbed OS 5.9 and older versions
 
-This example references the ESP8266 WiFi module, but the instructions are applicable to other modules.
+This example references the ESP8266 Wi-Fi module, but the instructions are applicable to other modules.
 
-1. Add the ESP8266 WiFi interface driver (esp8266-driver) if it is not already added.
+1. Add the ESP8266 Wi-Fi interface driver (esp8266-driver) if it is not already added:
    
     ```
     mbed add https://github.com/ARMmbed/esp8266-driver
@@ -290,31 +293,31 @@ This example references the ESP8266 WiFi module, but the instructions are applic
 
     <span class="notes">**Note:** You may have to update the firmware inside the ESP8266 module.</span>
 
-2. Include the header file for the interface.
+2. Include the header file for the interface:
    
     ```cpp
     #include "ESP8266Interface.h"
     ```
 
-3. Declare the network interface object.
+3. Declare the network interface object:
    
     ```cpp
     ESP8266Interface net(D1, D0);
     ```
 
-4. Connect the interface.
+4. Connect the interface:
    
     ```cpp
     nsapi_error_t status = net.connect(MBED_CONF_APP_WIFI_SSID, MBED_CONF_APP_WIFI_PASSWORD, NSAPI_SECURITY_WPA_WPA2);
     ```
 
-5. When Pelion Client is started, pass the network interface.
+5. When the Client is started, pass the network interface:
    
     ```cpp
     SimpleMbedCloudClient client(&net, &sd, &fs);
     ```
 
-6. Add the WiFi credentials information in `mbed_app.json` (located at the top level of the Simple Pelion Client example project).
+6. Add the Wi-Fi credentials information in `mbed_app.json` (located at the top level of the example project):
    
     ```json
         "config": {
@@ -361,7 +364,7 @@ Read the Mbed OS [Contributing](https://os.mbed.com/docs/latest/reference/portin
 
 The template example uses a ticker object to periodically fire a software interrupt to simulate button presses. Let’s say you want to make an actual button press.
 
-By default, there is a Ticker object, which fires every five seconds and invokes a callback function.
+By default, there is a Ticker object, which fires every five seconds and invokes a callback function:
 
 ```cpp
 Ticker timer;
@@ -401,21 +404,20 @@ If you want to change this to an actual button, here is how to do it:
 
 #### Pelion Client v1.3.x SOTP-specific changes
 
-Pelion Client v1.3.x introduces a new feature called Software One-Time Programming (SOTP) that makes use of the internal flash of the MCU as an One-Time-Programmable section. It stores the keys required to decrypt the credentials stored in the persistent storage. Read more on this in the [porting documentation](https://cloud.mbed.com/docs/current/porting/changing-a-customized-porting-layer.html#rtos-module) under the RTOS module section.
+The version v1.3+ introduces a new feature called Software One-Time Programming (SOTP) that makes use of the internal flash of the MCU as an One-Time-Programmable section. It stores the keys required to decrypt the credentials stored in the persistent storage. Read more on this in the [porting documentation](https://cloud.mbed.com/docs/current/porting/changing-a-customized-porting-layer.html#rtos-module) under the RTOS module section.
 
 The flash must be divided into two sections (default 2, maximum 2) for your target. You need to modify the `mbed_app.json` file as follows:
 
 1. Add a section to the `target_overrides` with SOTP addresses and sizes.
 
-    Here is an example for the NUCLEO_L476RG board. Note that with these flash sectors, the SOTP region is placed at the last two sectors of the flash. You can find the memory map information in the reference manual of your MCU.
+    You can find the memory map information in the reference manual of your MCU. Note the sectors should be placed at the last two sectors of the flash, so the SOTP region is preserved during drag and drop programming of binaries. This is an example for the NUCLEO_F429ZI board:
 
     ```json
-        "NUCLEO_L476RG": {
-            "sotp-section-1-address"           : "(0x08000000+((1024-32)*1024))",
-            "sotp-section-1-size"              : "(16*1024)",
-            "sotp-section-2-address"           : "(0x08000000+((1024-16)*1024))",
-            "sotp-section-2-size"              : "(16*1024)",
-            "sotp-num-sections"                : 2
+        "NUCLEO_F429ZI": {
+            "app.sotp-section-1-address": "(0x081C0000)",
+            "app.sotp-section-1-size"   : "(128*1024)",
+            "app.sotp-section-2-address": "(0x081E0000)",
+            "app.sotp-section-2-size"   : "(128*1024)"
         }
     ```
 
@@ -438,7 +440,7 @@ For full documentation about bootloaders and firmware update, read the following
 - [Introduccion to bootloaders](https://os.mbed.com/docs/latest/porting/bootloader.html)
 - [Creating and using a bootloader](https://os.mbed.com/docs/latest/tutorials/bootloader.html)
 - [Bootloader configuration in Mbed OS](https://os.mbed.com/docs/latest/tools/configuring-tools.html)
-- [Mbed Bootloader for Pelion IoT Device Management](https://github.com/ARMmbed/mbed-bootloader)
+- [Mbed Bootloader for Pelion Device Management Client](https://github.com/ARMmbed/mbed-bootloader)
 - [Updating devices with Arm Mbed CLI](https://os.mbed.com/docs/latest/tools/cli-update.html)
   
 This is a summary to use Arm Mbed OS managed bootloaders.
@@ -455,7 +457,7 @@ You can see an example of bootloader configuration for the `NUCLEO_F429ZI` in `b
 
 #### Enabling the application to use a bootloader 
 
-- Option 1: default & prebuilt bootloader
+##### Option 1: default & prebuilt bootloader
 
     If Mbed OS contains a prebuilt bootloader for the target, then you can indicate to use it in the `mbed_app.json`. For example:
 
@@ -469,7 +471,7 @@ You can see an example of bootloader configuration for the `NUCLEO_F429ZI` in `b
     }
     ```
 
-- Option 2: custom bootloader
+##### Option 2: custom bootloader
 
     If you'd like to overide a default bootloader or use a custom one available in the application, then indicate the path to the booloader, `app_offset` and `header_offset` parameters in `mbed_app.json`. For example:
 
@@ -497,21 +499,21 @@ Follow these steps to generate a manifest, compile and perform a firmware update
     mbed config -G CLOUD_SDK_API_KEY <your-api-key>
     ```
 
-2. Initialize the device management feature 
+2. Initialize the device management feature:
 
     ```
     mbed dm init -d "company.com" --model-name "product-model" -q --force
     ```
 
-3. Compile the application, include the firware update credentials generated before, merge with the bootloader and program the device
+3. Compile the application, include the firware update credentials generated before, merge with the bootloader and program the device:
 
     ```
     mbed compile -t <target> -m <toolchain> -c -f
     ```
 
-4. Open a serial terminal, verify the application boots and is able to register to the Pelion Device Management service. Write down the `<endpoint ID>`, as it's required to identify the device to perform a firmware update.
+4. Open a serial terminal, verify the application boots and is able to register to the Device Management service. Write down the `<endpoint ID>`, as it's required to identify the device to perform a firmware update.
 
-5. Update the firmware of the device through Mbed CLI
+5. Update the firmware of the device through Mbed CLI:
    
     ```
     mbed dm update device -D <device ID>
@@ -525,7 +527,7 @@ Follow these steps to generate a manifest, compile and perform a firmware update
     Downloading: [+++- ] 6 %
     ```
 
-    When the download completes, the firmware is verified. If everything is OK, the firmware update is applied, the device reboots and attemps to connect to Pelion Device Management service again. The `<endpoint ID>` should be preserved.
+    When the download completes, the firmware is verified. If everything is OK, the firmware update is applied, the device reboots and attemps to connect to the Device Management service again. The `<endpoint ID>` should be preserved.
 
 ## Automated testing
 
