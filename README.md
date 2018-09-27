@@ -459,9 +459,9 @@ You can see an example of bootloader configuration for the `NUCLEO_F429ZI` in `b
 
 ##### Option 1: default & prebuilt bootloader
 
-    If Mbed OS contains a prebuilt bootloader for the target, then you can indicate to use it in the `mbed_app.json`. For example:
+If Mbed OS contains a prebuilt bootloader for the target, then you can indicate to use it in the `mbed_app.json`. For example:
 
-    ```
+```
     {
         "target_overrides": {
             "K64F": {
@@ -469,13 +469,13 @@ You can see an example of bootloader configuration for the `NUCLEO_F429ZI` in `b
             }
         }
     }
-    ```
+```
 
 ##### Option 2: custom bootloader
 
-    If you'd like to overide a default bootloader or use a custom one available in the application, then indicate the path to the booloader, `app_offset` and `header_offset` parameters in `mbed_app.json`. For example:
+If you'd like to overide a default bootloader or use a custom one available in the application, then indicate the path to the booloader, `app_offset` and `header_offset` parameters in `mbed_app.json`. For example:
 
-    ```
+```
     "target_overrides": {
             "K64F": {
                 "target.app_offset": "0xa400",
@@ -483,9 +483,9 @@ You can see an example of bootloader configuration for the `NUCLEO_F429ZI` in `b
                 "target.bootloader_img": "bootloader/my_bootloader.bin"
             }
         }
-    ```
+```
 
-    You may need to specify `header_format` as well. You could include the default header format from [Mbed OS](https://github.com/ARMmbed/mbed-os/blob/master/features/FEATURE_BOOTLOADER/mbed_lib.json) by adding `"target.features_add": ["BOOTLOADER"]`.
+You may need to specify `header_format` as well. You could include the default header format from [Mbed OS](https://github.com/ARMmbed/mbed-os/blob/master/features/FEATURE_BOOTLOADER/mbed_lib.json) by adding `"target.features_add": ["BOOTLOADER"]`.
 
 #### Verifying that firmware update works
 
