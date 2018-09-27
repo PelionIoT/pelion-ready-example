@@ -451,7 +451,7 @@ Otherwise, you'll need to compile the [mbed-bootloader](https://github.com/armmb
 
 You can see an example of bootloader configuration for the `NUCLEO_F429ZI` in `bootloader/mbed_app.json`. This is compatible with the `mbed_app.json` configuration in this template application.
 
-<span class="notes">**Note:** Make sure the configuration in the `mbed-bootloader/mbed_app.json` corresponds with the configuration in your application's `mbed_app.json`, otherwise the bootloader will not be able to apply the new firmware.</span>
+<span class="notes">**Note:** Make sure the configuration for the bootloader (`mbed_app.json`) corresponds with the configuration of your application's `mbed_app.json`, otherwise the bootloader may not be able to find an application or apply the new firmware.</span>
 
 #### Enabling the application to use a bootloader 
 
