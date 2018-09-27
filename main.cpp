@@ -18,17 +18,18 @@
 
 #include "mbed.h"
 #include "simple-mbed-cloud-client.h"
-#include "SDBlockDevice.h"
 #include "FATFileSystem.h"
-#include "EthernetInterface.h"
 
 // An event queue is a very useful structure to debounce information between contexts (e.g. ISR and normal threads)
 // This is great because things such as network operations are illegal in ISR, so updating a resource in a button's fall() function is not allowed
 EventQueue eventQueue;
 
-// Storage implementation definition, currently using SDBlockDevice (SPI flash, DataFlash, and internal flash are also available)
-SDBlockDevice sd(PTE3, PTE1, PTE2, PTE4);
-FATFileSystem fs("sd", &sd);
+// Default block device
+BlockDevice* bd = BlockDevice::get_default_instance();
+FATFileSystem fs("sd", bd);
+
+// Default network interface object
+NetworkInterface *net;
 
 // Declaring pointers for access to Mbed Cloud Client resources outside of main()
 MbedCloudClientResource *button_res;
@@ -104,18 +105,19 @@ int main(void) {
     printf("Connecting to the network using Ethernet...\n");
 
     // Connect to the internet (DHCP is expected to be on)
-    EthernetInterface net;
-    nsapi_error_t status = net.connect();
+    net = NetworkInterface::get_default_instance();
 
-    if (status != 0) {
+    nsapi_error_t status = net->connect();
+
+    if (status != NSAPI_ERROR_OK) {
         printf("Connecting to the network failed %d!\n", status);
         return -1;
     }
 
-    printf("Connected to the network successfully. IP address: %s\n", net.get_ip_address());
+    printf("Connected to the network successfully. IP address: %s\n", net->get_ip_address());
 
     // SimpleMbedCloudClient handles registering over LwM2M to Mbed Cloud
-    SimpleMbedCloudClient client(&net, &sd, &fs);
+    SimpleMbedCloudClient client(net, bd, &fs);
     int client_status = client.init();
     if (client_status != 0) {
         printf("Initializing Mbed Cloud Client failed (%d)\n", client_status);
