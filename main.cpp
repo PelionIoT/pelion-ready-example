@@ -31,7 +31,7 @@ FATFileSystem fs("fs", bd);
 // Default network interface object
 NetworkInterface *net = NetworkInterface::get_default_instance();
 
-// Declaring pointers for access to Mbed Cloud Client resources outside of main()
+// Declaring pointers for access to Pelion Device Management Client resources outside of main()
 MbedCloudClientResource *button_res;
 MbedCloudClientResource *pattern_res;
 
@@ -97,11 +97,11 @@ void button_callback(MbedCloudClientResource *resource, const NoticationDelivery
  * @param endpoint Information about the registered endpoint such as the name (so you can find it back in portal)
  */
 void registered(const ConnectorClientEndpointInfo *endpoint) {
-    printf("Connected to Mbed Cloud. Endpoint Name: %s\n", endpoint->internal_endpoint_name.c_str());
+    printf("Connected to Pelion Device Management. Endpoint Name: %s\n", endpoint->internal_endpoint_name.c_str());
 }
 
 int main(void) {
-    printf("Starting Simple Mbed Cloud Client example\n");
+    printf("Starting Simple Pelion Device Management Client example\n");
     printf("Connecting to the network using Ethernet...\n");
 
     // Connect to the internet (DHCP is expected to be on)
@@ -114,11 +114,11 @@ int main(void) {
 
     printf("Connected to the network successfully. IP address: %s\n", net->get_ip_address());
 
-    // SimpleMbedCloudClient handles registering over LwM2M to Mbed Cloud
+    // SimpleMbedCloudClient handles registering over LwM2M to Pelion Device Management
     SimpleMbedCloudClient client(net, bd, &fs);
     int client_status = client.init();
     if (client_status != 0) {
-        printf("Initializing Mbed Cloud Client failed (%d)\n", client_status);
+        printf("Initializing Pelion Device Management Client failed (%d)\n", client_status);
         return -1;
     }
 
@@ -138,12 +138,12 @@ int main(void) {
     blink_res->methods(M2MMethod::POST);
     blink_res->attach_post_callback(blink_callback);
 
-    printf("Initialized Mbed Cloud Client. Registering...\n");
+    printf("Initialized Pelion Device Management Client. Registering...\n");
 
     // Callback that fires when registering is complete
     client.on_registered(&registered);
 
-    // Register with Mbed Cloud
+    // Register with Pelion Device Management
     client.register_and_connect();
 
     // Placeholder for callback to update local resource when GET comes.
