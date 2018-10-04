@@ -25,11 +25,11 @@
 EventQueue eventQueue;
 
 // Default block device
-BlockDevice* bd = BlockDevice::get_default_instance();
-FATFileSystem fs("sd", bd);
+BlockDevice *bd = BlockDevice::get_default_instance();
+FATFileSystem fs("fs", bd);
 
 // Default network interface object
-NetworkInterface *net;
+NetworkInterface *net = NetworkInterface::get_default_instance();
 
 // Declaring pointers for access to Mbed Cloud Client resources outside of main()
 MbedCloudClientResource *button_res;
@@ -105,8 +105,6 @@ int main(void) {
     printf("Connecting to the network using Ethernet...\n");
 
     // Connect to the internet (DHCP is expected to be on)
-    net = NetworkInterface::get_default_instance();
-
     nsapi_error_t status = net->connect();
 
     if (status != NSAPI_ERROR_OK) {
