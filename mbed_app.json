@@ -12,7 +12,7 @@
     "macros": [
         "ARM_UC_USE_PAL_BLOCKDEVICE=1",
         "MBED_CLOUD_CLIENT_UPDATE_STORAGE=ARM_UCP_FLASHIAP_BLOCKDEVICE",
-        "MBED_CONF_APP_MAIN_STACK_SIZE=5120",
+        "MBED_CONF_APP_MAIN_STACK_SIZE=6000",
         "MBED_CLIENT_USER_CONFIG_FILE=\"mbed_cloud_client_user_config.h\"",
         "MBED_CLOUD_CLIENT_USER_CONFIG_FILE=\"mbed_cloud_client_user_config.h\""
     ],
@@ -60,40 +60,20 @@
         },
         "NUCLEO_F429ZI": {
             "target.network-default-interface-type" : "ETHERNET",
+            "target.app_offset"                     : "0x10400",
+            "target.header_offset"                  : "0x10000",
+            "target.bootloader_img"                 : "bootloader/mbed-bootloader-F429ZI.bin",
+            "target.components_add"                 : ["SD"],
             "update-client.bootloader-details"      : "0x080078CC",
+            "sd.SPI_MOSI"                           : "PE_6",
+            "sd.SPI_MISO"                           : "PE_5",
+            "sd.SPI_CLK"                            : "PE_2",
+            "sd.SPI_CS"                             : "PE_4",
             "update-client.application-details"     : "(0x08000000+64*1024)",
-            "client_app.sotp-section-1-address"     : "(0x08000000+32*1024)",
-            "client_app.sotp-section-1-size"        : "(16*1024)",
-            "client_app.sotp-section-2-address"     : "(0x08000000+48*1024)",
-            "client_app.sotp-section-2-size"        : "(16*1024)"
-        },
-        "UBLOX_EVK_ODIN_W2": {
-            "target.network-default-interface-type" : "WIFI",
-            "update-client.bootloader-details"      : "0x08007300",
-            "update-client.application-details"     : "(0x08000000+64*1024)",
-            "target.lse_available"                  : 0,
-            "target.macros_remove"                  : ["MBEDTLS_CONFIG_HW_SUPPORT"],
-            "client_app.sotp-section-1-address"     : "(0x08000000+32*1024)",
-            "client_app.sotp-section-1-size"        : "(16*1024)",
-            "client_app.sotp-section-2-address"     : "(0x08000000+48*1024)",
-            "client_app.sotp-section-2-size"        : "(16*1024)"
-        },
-        "NUCLEO_F411RE": {
-            "client_app.mbedtls-user-config-file"      : "\"mbedTLSConfig_mbedOS_SW_TRNG.h\"",
-            "client_app.pal-user-defined-configuration": "\"sotp_non_trng_config_MbedOS.h\"",
-            "target.network-default-interface-type" : "WIFI",
-            "drivers.uart-serial-rxbuf-size"        : 1024,
-            "drivers.uart-serial-txbuf-size"        : 1024,
-            "update-client.bootloader-details"      : "(0x08000000+30*1024)",
-            "update-client.application-details"     : "(0x08000000+64*1024)",
-            "idw0xx1.provide-default": true,
-            "idw0xx1.tx": "PA_9",
-            "idw0xx1.rx": "PA_10",
-            "target.macros_remove"                  : ["MBEDTLS_CONFIG_HW_SUPPORT"],
-            "client_app.sotp-section-1-address"     : "(0x08000000+32*1024)",
-            "client_app.sotp-section-1-size"        : "(16*1024)",
-            "client_app.sotp-section-2-address"     : "(0x08000000+48*1024)",
-            "client_app.sotp-section-2-size"        : "(16*1024)"
+            "client_app.sotp-section-1-address"     : "(0x081C0000)",
+            "client_app.sotp-section-1-size"        : "(128*1024)",
+            "client_app.sotp-section-2-address"     : "(0x081E0000)",
+            "client_app.sotp-section-2-size"        : "(128*1024)"
         }
     }
 }
