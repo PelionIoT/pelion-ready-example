@@ -539,16 +539,15 @@ This template application contains a working application and tests passing for t
 
 ## Known issues
 
-- The FW Update doesn't start and campaign is in draft starte.
-  This might be caused by your SD card having old credentials.
+- The FW Update doesn't start and the campaign is in draft state. This might be caused by your SD card having old credentials. <br>
   **Solution:** You may need to do a full reformat the SD card. 
   
-- Download of new firmware happens, but the bootloader doesn't install the new firmware.
+- The download of new firmware happens, but the bootloader doesn't install the new firmware. <br>
   **Solution:** Check your `mbed_app.json` configuration, as you may have a missing entry, for example: `"update-client.bootloader-details"`.
   
 - You get one of the following warnings:
-  -  UpdateWarningSignatureInvalid
-  - UpdateWarningCertificateNotFound
+  - UpdateWarningSignatureInvalid
+  - UpdateWarningCertificateNotFound <br>
   **Solution:** You may need to do a full reformat the SD card. 
 
 For other issues, check [github](https://github.com/ARMmbed/simple-mbed-cloud-client-template-restricted/issues).
