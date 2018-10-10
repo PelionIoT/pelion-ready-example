@@ -15,6 +15,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 // ----------------------------------------------------------------------------
+#ifndef MBED_TEST_MODE
 
 #include "mbed.h"
 #include "simple-mbed-cloud-client.h"
@@ -101,8 +102,8 @@ void registered(const ConnectorClientEndpointInfo *endpoint) {
 }
 
 int main(void) {
-    printf("Starting Simple Mbed Cloud Client example\n");
-    printf("Connecting to the network using Ethernet...\n");
+    printf("Starting Simple Pelion Device Management Client example\n");
+    printf("Connecting to the network...\n");
 
     // Connect to the internet (DHCP is expected to be on)
     net = NetworkInterface::get_default_instance();
@@ -120,7 +121,7 @@ int main(void) {
     SimpleMbedCloudClient client(net, bd, &fs);
     int client_status = client.init();
     if (client_status != 0) {
-        printf("Initializing Mbed Cloud Client failed (%d)\n", client_status);
+        printf("Pelion Client initialization failed (%d)\n", client_status);
         return -1;
     }
 
@@ -140,7 +141,7 @@ int main(void) {
     blink_res->methods(M2MMethod::POST);
     blink_res->attach_post_callback(blink_callback);
 
-    printf("Initialized Mbed Cloud Client. Registering...\n");
+    printf("Initialized Pelion Client. Registering...\n");
 
     // Callback that fires when registering is complete
     client.on_registered(&registered);
@@ -156,3 +157,4 @@ int main(void) {
     // You can easily run the eventQueue in a separate thread if required
     eventQueue.dispatch_forever();
 }
+#endif
