@@ -15,6 +15,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 // ----------------------------------------------------------------------------
+#ifndef MBED_TEST_MODE
 
 #include "mbed.h"
 #include "simple-mbed-cloud-client.h"
@@ -156,3 +157,4 @@ int main(void) {
     // You can easily run the eventQueue in a separate thread if required
     eventQueue.dispatch_forever();
 }
+#endif

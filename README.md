@@ -516,7 +516,7 @@ Follow these steps to generate a manifest, compile and perform a firmware update
 5. Update the firmware of the device through Mbed CLI:
    
     ```
-    mbed dm update device -D <device ID>
+    mbed dm update device -D <device ID> -t <target> -m <toolchain>
     ```
     
     Inspect the logs on the device to see the update progress. It should look similar to:
