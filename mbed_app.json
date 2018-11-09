@@ -21,7 +21,7 @@
     ],
     "target_overrides": {
         "*": {
-            "target.features_add"               : ["BOOTLOADER", "STORAGE"],
+            "target.features_add"               : ["BOOTLOADER"],
             "target.components_add"             : ["SD"],
             "platform.stdio-baud-rate"          : 115200,
             "platform.stdio-convert-newlines"   : true,

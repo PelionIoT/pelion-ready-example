@@ -533,7 +533,7 @@ Follow these steps to generate a manifest, compile and perform a firmware update
 
 The Simple Pelion Client provides Greentea tests to confirm your platform works as expected. The network and storage configuration is already defined in Mbed OS 5.10, but you may want to override the configuration in `mbed_app.json`.
 
-For details on Simple Pelion Client testing, refer to the documentation [here](https://github.com/ARMmbed/simple-mbed-cloud-client#tests).
+For details on Simple Pelion Client testing, refer to the documentation [here](https://github.com/ARMmbed/simple-mbed-cloud-client#testing).
 
 This template application contains a working application and tests passing for the `K64F` and `K66F` platforms.
 
