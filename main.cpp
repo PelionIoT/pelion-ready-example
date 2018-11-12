@@ -119,7 +119,7 @@ int main(void) {
     SimpleMbedCloudClient client(net, bd, &fs);
     int client_status = client.init();
     if (client_status != 0) {
-        printf("Initializing Pelion Device Management Client failed (%d)\n", client_status);
+        printf("Pelion Client initialization failed (%d)\n", client_status);
         return -1;
     }
 
@@ -139,7 +139,7 @@ int main(void) {
     blink_res->methods(M2MMethod::POST);
     blink_res->attach_post_callback(blink_callback);
 
-    printf("Initialized Pelion Device Management Client. Registering...\n");
+    printf("Initialized Pelion Client. Registering...\n");
 
     // Callback that fires when registering is complete
     client.on_registered(&registered);

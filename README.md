@@ -508,7 +508,7 @@ Follow these steps to generate a manifest, compile and perform a firmware update
 3. Compile the application, include the firware update credentials generated before, merge with the bootloader and program the device:
 
     ```
-    mbed compile -t <target> -m <toolchain> -c -f
+    mbed compile -t <toolchain> -m <target> -c -f
     ```
 
 4. Open a serial terminal, verify the application boots and is able to register to the Device Management service. Write down the `<endpoint ID>`, as it's required to identify the device to perform a firmware update.
@@ -516,7 +516,7 @@ Follow these steps to generate a manifest, compile and perform a firmware update
 5. Update the firmware of the device through Mbed CLI:
 
     ```
-    mbed dm update device -D <device ID> -t <target> -m <toolchain>
+    mbed dm update device -D <device ID> -t <toolchain> -m <target>
     ```
 
     Inspect the logs on the device to see the update progress. It should look similar to:
