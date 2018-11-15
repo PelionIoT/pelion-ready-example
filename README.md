@@ -216,13 +216,13 @@ If you wish to override the default network configuration, you can add the confi
 ##### Example of network initialization for Ethernet using Mbed OS 5.10+
 
 1. Declare the network interface object:
-   
+
     ```
     EthernetInterface * net = NetworkInterface::get_default_instance();
     ```
 
 2. Connect the interface:
-   
+
     ```
     status = net->connect();
     ```
@@ -235,13 +235,13 @@ If you wish to override the default network configuration, you can add the confi
 ##### Example of network initialization for Wi-Fi using Mbed OS 5.10+
 
 1. Declare the network interface object:
-   
+
     ```
     WiFiInterface *net = WiFiInterface::get_default_instance();
     ```
 
 2. Connect the interface:
-   
+
     ```
     status  = net->connect(MBED_CONF_APP_WIFI_SSID, MBED_CONF_APP_WIFI_PASSWORD, NSAPI_SECURITY_WPA_WPA2);
     ```
@@ -286,7 +286,7 @@ The Ethernet interface is included within Mbed OS, so you do not need to add a l
 This example references the ESP8266 Wi-Fi module, but the instructions are applicable to other modules.
 
 1. Add the ESP8266 Wi-Fi interface driver (esp8266-driver) if it is not already added:
-   
+
     ```
     mbed add https://github.com/ARMmbed/esp8266-driver
     ```
@@ -294,31 +294,31 @@ This example references the ESP8266 Wi-Fi module, but the instructions are appli
     <span class="notes">**Note:** You may have to update the firmware inside the ESP8266 module.</span>
 
 2. Include the header file for the interface:
-   
+
     ```cpp
     #include "ESP8266Interface.h"
     ```
 
 3. Declare the network interface object:
-   
+
     ```cpp
     ESP8266Interface net(D1, D0);
     ```
 
 4. Connect the interface:
-   
+
     ```cpp
     nsapi_error_t status = net.connect(MBED_CONF_APP_WIFI_SSID, MBED_CONF_APP_WIFI_PASSWORD, NSAPI_SECURITY_WPA_WPA2);
     ```
 
 5. When the Client is started, pass the network interface:
-   
+
     ```cpp
     SimpleMbedCloudClient client(&net, &sd, &fs);
     ```
 
 6. Add the Wi-Fi credentials information in `mbed_app.json` (located at the top level of the example project):
-   
+
     ```json
         "config": {
             "wifi-ssid": {
@@ -442,7 +442,7 @@ For full documentation about bootloaders and firmware update, read the following
 - [Bootloader configuration in Mbed OS](https://os.mbed.com/docs/latest/tools/configuring-tools.html)
 - [Mbed Bootloader for Pelion Device Management Client](https://github.com/ARMmbed/mbed-bootloader)
 - [Updating devices with Arm Mbed CLI](https://os.mbed.com/docs/latest/tools/cli-update.html)
-  
+
 This is a summary to use Arm Mbed OS managed bootloaders.
 
 #### Preparing a bootloader
@@ -455,7 +455,7 @@ You can see an example of bootloader configuration for the `NUCLEO_F429ZI` in `b
 
 <span class="notes">**Note:** Make sure the configuration for the bootloader (`mbed_app.json`) corresponds with the configuration of your application's `mbed_app.json`, otherwise the bootloader may not be able to find an application or apply the new firmware.</span>
 
-#### Enabling the application to use a bootloader 
+#### Enabling the application to use a bootloader
 
 ##### Option 1: default & prebuilt bootloader
 
@@ -514,11 +514,11 @@ Follow these steps to generate a manifest, compile and perform a firmware update
 4. Open a serial terminal, verify the application boots and is able to register to the Device Management service. Write down the `<endpoint ID>`, as it's required to identify the device to perform a firmware update.
 
 5. Update the firmware of the device through Mbed CLI:
-   
+
     ```
     mbed dm update device -D <device ID> -t <toolchain> -m <target>
     ```
-    
+
     Inspect the logs on the device to see the update progress. It should look similar to:
 
     ```
