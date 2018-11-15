@@ -26,13 +26,13 @@
 EventQueue eventQueue;
 
 // Default block device
-BlockDevice* bd = BlockDevice::get_default_instance();
-FATFileSystem fs("sd", bd);
+BlockDevice *bd = BlockDevice::get_default_instance();
+FATFileSystem fs("fs");
 
 // Default network interface object
-NetworkInterface *net;
+NetworkInterface *net = NetworkInterface::get_default_instance();
 
-// Declaring pointers for access to Mbed Cloud Client resources outside of main()
+// Declaring pointers for access to Pelion Device Management Client resources outside of main()
 MbedCloudClientResource *button_res;
 MbedCloudClientResource *pattern_res;
 
@@ -106,8 +106,6 @@ int main(void) {
     printf("Connecting to the network...\n");
 
     // Connect to the internet (DHCP is expected to be on)
-    net = NetworkInterface::get_default_instance();
-
     nsapi_error_t status = net->connect();
 
     if (status != NSAPI_ERROR_OK) {
@@ -117,7 +115,7 @@ int main(void) {
 
     printf("Connected to the network successfully. IP address: %s\n", net->get_ip_address());
 
-    // SimpleMbedCloudClient handles registering over LwM2M to Mbed Cloud
+    // SimpleMbedCloudClient handles registering over LwM2M to Pelion Device Management
     SimpleMbedCloudClient client(net, bd, &fs);
     int client_status = client.init();
     if (client_status != 0) {
@@ -146,7 +144,7 @@ int main(void) {
     // Callback that fires when registering is complete
     client.on_registered(&registered);
 
-    // Register with Mbed Cloud
+    // Register with Pelion Device Management
     client.register_and_connect();
 
     // Placeholder for callback to update local resource when GET comes.
