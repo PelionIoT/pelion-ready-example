@@ -32,10 +32,7 @@
             "client_app.sotp-section-1-size"        : "( 4*1024)",
             "client_app.sotp-section-2-address"     : "(36*1024)",
             "client_app.sotp-section-2-size"        : "( 4*1024)",
-            "client_app.partition_mode"             : "1",
-            "client_app.auto_partition"             : "1",
-            "client_app.pal_number_of_partition"    : "1",
-            "client_app.primary_partition_size"     : "(1024*1024*1024)"
+            "client_app.primary_partition_size"     : "(1024*1024*2)"
         },
         "K66F": {
             "target.network-default-interface-type" : "ETHERNET",
@@ -45,10 +42,7 @@
             "client_app.sotp-section-1-size"        : "( 4*1024)",
             "client_app.sotp-section-2-address"     : "(36*1024)",
             "client_app.sotp-section-2-size"        : "( 4*1024)",
-            "client_app.partition_mode"             : "1",
-            "client_app.auto_partition"             : "1",
-            "client_app.pal_number_of_partition"    : "1",
-            "client_app.primary_partition_size"     : "(1024*1024*1024)"
+            "client_app.primary_partition_size"     : "(1024*1024*2)"
         },
         "NUCLEO_F429ZI": {
             "target.network-default-interface-type" : "ETHERNET",
@@ -66,10 +60,7 @@
             "sd.SPI_CLK"                            : "PE_2",
             "sd.SPI_CS"                             : "PE_4",
             "update-client.application-details"     : "(0x08000000+64*1024)",
-            "client_app.partition_mode"             : "1",
-            "client_app.auto_partition"             : "1",
-            "client_app.pal_number_of_partition"    : "1",
-            "client_app.primary_partition_size"     : "(1024*1024*4)"
+            "client_app.primary_partition_size"     : "(1024*1024*2)"
         }
     },
     "config": {
