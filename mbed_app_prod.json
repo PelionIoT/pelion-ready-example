@@ -31,7 +31,11 @@
             "sotp-section-2-address"            : "(36*1024)",
             "sotp-section-2-size"               : "(4*1024)",
             "sotp-num-sections"                 : 2,
-            "update-client.application-details" : "(MBED_CONF_APP_FLASH_START_ADDRESS + 40*1024)"
+            "update-client.application-details" : "(MBED_CONF_APP_FLASH_START_ADDRESS + 40*1024)",
+            "client_app.partition_mode"         : "1",
+            "client_app.auto_partition"         : "1",
+            "client_app.pal_number_of_partition": "1",
+            "client_app.primary_partition_size" : "(1024*1024*1024)"
         },
         "K66F": {
             "target.features_add"               : ["BOOTLOADER"],
@@ -46,7 +50,11 @@
             "target.bootloader_img"             : "bootloader/mbed-bootloader-K66F.bin",
             "target.header_offset"              : "0x10000",
             "target.app_offset"                 : "0x10400",
-            "update-client.application-details" : "(MBED_CONF_APP_FLASH_START_ADDRESS + 64*1024)"
+            "update-client.application-details" : "(MBED_CONF_APP_FLASH_START_ADDRESS + 64*1024)",
+            "client_app.partition_mode"         : "1",
+            "client_app.auto_partition"         : "1",
+            "client_app.pal_number_of_partition": "1",
+            "client_app.primary_partition_size" : "(1024*1024*1024)"
         },
         "NUCLEO_F429ZI": {
             "target.features_add"               : ["BOOTLOADER"],
@@ -65,7 +73,11 @@
             "target.bootloader_img"             : "bootloader/mbed-bootloader-NUCLEO_F429ZI.bin",
             "target.header_offset"              : "0x10000",
             "target.app_offset"                 : "0x10400",
-            "update-client.application-details" : "(MBED_CONF_APP_FLASH_START_ADDRESS + 64*1024)"
+            "update-client.application-details" : "(MBED_CONF_APP_FLASH_START_ADDRESS + 64*1024)",
+            "client_app.partition_mode"         : "1",
+            "client_app.auto_partition"         : "1",
+            "client_app.pal_number_of_partition": "1",
+            "client_app.primary_partition_size" : "(1024*1024*4)"
         }
     },
     "config": {
@@ -75,7 +87,7 @@
         },
         "developer-mode": {
             "help": "Enable Developer mode to skip Factory enrollment",
-            "value": 1
+            "value": null
         },
         "main-stack-size": {
             "value": 6000
