@@ -18,20 +18,23 @@
             "update-client.storage-locations"   : "1",
             "mbed-trace.enable"                 : null,
             "nsapi.default-wifi-security"       : "WPA_WPA2",
-            "nsapi.default-wifi-ssid"           : "\"SSID\"",
-            "nsapi.default-wifi-password"       : "\"PASSWORD\""
+            "nsapi.default-wifi-ssid"           : "\"mbedEnabled\"",
+            "nsapi.default-wifi-password"       : "\"validation\""
         },
         "K64F": {
             "target.features_add"               : ["BOOTLOADER"],
             "target.components_add"             : ["SD"],
             "flash-start-address"               : "0x0",
-            "flash-size"                        : "(2048*1024)",
-            "sotp-section-1-address"            : "(32*1024)",
+            "flash-size"                        : "(1024*1024)",
+            "sotp-section-1-address"            : "(MBED_CONF_APP_FLASH_START_ADDRESS + MBED_CONF_APP_FLASH_SIZE - 2*(4*1024))",
             "sotp-section-1-size"               : "(4*1024)",
-            "sotp-section-2-address"            : "(36*1024)",
+            "sotp-section-2-address"            : "(MBED_CONF_APP_FLASH_START_ADDRESS + MBED_CONF_APP_FLASH_SIZE - 1*(4*1024))",
             "sotp-section-2-size"               : "(4*1024)",
             "sotp-num-sections"                 : 2,
-            "update-client.application-details" : "(MBED_CONF_APP_FLASH_START_ADDRESS + 40*1024)"
+            "target.bootloader_img"             : "bootloader/mbed-bootloader-K64F.bin",
+            "target.header_offset"              : "0x10000",
+            "target.app_offset"                 : "0x10400",
+            "update-client.application-details" : "(MBED_CONF_APP_FLASH_START_ADDRESS + 64*1024)"
         },
         "K66F": {
             "target.features_add"               : ["BOOTLOADER"],

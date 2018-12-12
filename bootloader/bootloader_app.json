@@ -42,6 +42,8 @@
         "*": {
             "target.features_remove"           : ["LWIP"],
             "target.features_add"              : ["COMMON_PAL"],
+            "target.extra_labels_remove"       : ["PSA"],
+            "target.components_remove"         : ["FLASHIAP"],
             "platform.stdio-baud-rate"         : 115200,
             "platform.stdio-flush-at-exit"     : false,
             "update-client.storage-address"    : "(1024*1024*64)",
@@ -51,7 +53,7 @@
         },
         "K64F": {
             "flash-start-address"              : "0x0",
-            "flash-size"                       : "(2048*1024)",
+            "flash-size"                       : "(1024*1024)",
             "nvstore.area_1_address"           : "(MBED_CONF_APP_FLASH_START_ADDRESS + MBED_CONF_APP_FLASH_SIZE - 2*(4*1024))",
             "nvstore.area_1_size"              : "(4*1024)",
             "nvstore.area_2_address"           : "(MBED_CONF_APP_FLASH_START_ADDRESS + MBED_CONF_APP_FLASH_SIZE - 1*(4*1024))",
@@ -118,7 +120,6 @@
         },
         "DISCO_L475VG_IOT01A": {
             "target.components_add"            : ["QSPIF"],
-            "target.components_remove"         : ["FLASHIAP"],
             "flash-start-address"              : "0x08000000",
             "flash-size"                       : "(1024*1024)",
             "nvstore.area_1_address"           : "(MBED_CONF_APP_FLASH_START_ADDRESS + MBED_CONF_APP_FLASH_SIZE - 2*(2*1024))",
@@ -232,7 +233,6 @@
         "MTB_USI_WM_BN_BM_22": {
             "target.extra_labels_remove"       : ["WICED"],
             "target.components_add"            : ["SPIF"],
-            "target.components_remove"         : ["FLASHIAP"],
             "flash-start-address"              : "0x08000000",
             "flash-size"                       : "(1024*1024)",
             "nvstore.area_1_address"           : "(MBED_CONF_APP_FLASH_START_ADDRESS + 48*1024)",
