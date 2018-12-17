@@ -42,6 +42,8 @@
         "*": {
             "target.features_remove"           : ["LWIP"],
             "target.features_add"              : ["COMMON_PAL"],
+            "target.extra_labels_remove"       : ["PSA"],
+            "target.components_remove"         : ["FLASHIAP"],
             "platform.stdio-baud-rate"         : 115200,
             "platform.stdio-flush-at-exit"     : false,
             "update-client.storage-address"    : "(1024*1024*64)",
@@ -51,7 +53,7 @@
         },
         "K64F": {
             "flash-start-address"              : "0x0",
-            "flash-size"                       : "(2048*1024)",
+            "flash-size"                       : "(1024*1024)",
             "nvstore.area_1_address"           : "(MBED_CONF_APP_FLASH_START_ADDRESS + MBED_CONF_APP_FLASH_SIZE - 2*(4*1024))",
             "nvstore.area_1_size"              : "(4*1024)",
             "nvstore.area_2_address"           : "(MBED_CONF_APP_FLASH_START_ADDRESS + MBED_CONF_APP_FLASH_SIZE - 1*(4*1024))",
@@ -118,7 +120,6 @@
         },
         "DISCO_L475VG_IOT01A": {
             "target.components_add"            : ["QSPIF"],
-            "target.components_remove"         : ["FLASHIAP"],
             "flash-start-address"              : "0x08000000",
             "flash-size"                       : "(1024*1024)",
             "nvstore.area_1_address"           : "(MBED_CONF_APP_FLASH_START_ADDRESS + MBED_CONF_APP_FLASH_SIZE - 2*(2*1024))",
@@ -146,6 +147,22 @@
             "update-client.storage-address"    : "(1024*1024*2)",
             "update-client.storage-size"       : "(1024*1024*2)",
             "update-client.storage-locations"  : 1
+        },
+        "DISCO_F746NG": {
+            "target.components_add"            : ["QSPIF"],
+            "target.components_remove"         : ["FLASHIAP"],
+            "flash-start-address"              : "0x08000000",
+            "flash-size"                       : "(1024*1024)",
+            "nvstore.area_1_address"           : "(MBED_CONF_APP_FLASH_START_ADDRESS + MBED_CONF_APP_FLASH_SIZE - 2*(256*1024))",
+            "nvstore.area_1_size"              : "(256*1024)",
+            "nvstore.area_2_address"           : "(MBED_CONF_APP_FLASH_START_ADDRESS + MBED_CONF_APP_FLASH_SIZE - 1*(256*1024))",
+            "nvstore.area_2_size"              : "(256*1024)",
+            "update-client.application-details": "(MBED_CONF_APP_FLASH_START_ADDRESS + 64*1024)",
+            "update-client.storage-address"    : "(1024*1024*2)",
+            "update-client.storage-size"       : "(1024*1024*2)",
+            "update-client.storage-locations"  : 1,
+            "application-start-address"        : "(MBED_CONF_APP_FLASH_START_ADDRESS + 65*1024)",
+            "max-application-size"             : "DEFAULT_MAX_APPLICATION_SIZE"
         },
         "NUMAKER_PFM_NUC472": {
             "drivers.uart-serial-rxbuf-size"   : 1024,
@@ -186,6 +203,21 @@
             "application-start-address"        : "(MBED_CONF_APP_FLASH_START_ADDRESS + 65*1024)",
             "max-application-size"             : "DEFAULT_MAX_APPLICATION_SIZE"
         },
+       "GR_LYCHEE": {
+            "flash-start-address"              : "0x18000000",
+            "flash-size"                       : "(8*1024*1024)",
+            "nvstore.area_1_address"           : "(MBED_CONF_APP_FLASH_START_ADDRESS + MBED_CONF_APP_FLASH_SIZE - 2*(4*1024))",
+            "nvstore.area_1_size"              : "(4*1024)",
+            "nvstore.area_2_address"           : "(MBED_CONF_APP_FLASH_START_ADDRESS + MBED_CONF_APP_FLASH_SIZE - 1*(4*1024))",
+            "nvstore.area_2_size"              : "(4*1024)",
+            "update-client.application-details": "(MBED_CONF_APP_FLASH_START_ADDRESS+64*1024)",
+            "application-start-address"        : "(MBED_CONF_APP_FLASH_START_ADDRESS+65*1024)",
+            "max-application-size"             : "DEFAULT_MAX_APPLICATION_SIZE",
+            "sd.SPI_MOSI"                      : "P5_6",
+            "sd.SPI_MISO"                      : "P5_7",
+            "sd.SPI_CLK"                       : "P5_4",
+            "sd.SPI_CS"                        : "P5_5"
+        },
         "UBLOX_EVK_ODIN_W2": {
             "target.device_has_remove"         : ["EMAC"],
             "flash-start-address"              : "0x08000000",
@@ -208,6 +240,21 @@
             "update-client.application-details": "(MBED_CONF_APP_FLASH_START_ADDRESS + 64*1024)",
             "application-start-address"        : "(MBED_CONF_APP_FLASH_START_ADDRESS + 65*1024)",
             "max-application-size"             : "DEFAULT_MAX_APPLICATION_SIZE"
+        },
+        "SDT64B": {
+            "flash-start-address"              : "0x0",
+            "flash-size"                       : "(1024*1024)",
+            "nvstore.area_1_address"           : "(MBED_CONF_APP_FLASH_START_ADDRESS + MBED_CONF_APP_FLASH_SIZE - 2*(4*1024))",
+            "nvstore.area_1_size"              : "(4*1024)",
+            "nvstore.area_2_address"           : "(MBED_CONF_APP_FLASH_START_ADDRESS + MBED_CONF_APP_FLASH_SIZE - 1*(4*1024))",
+            "nvstore.area_2_size"              : "(4*1024)",
+            "update-client.application-details": "(MBED_CONF_APP_FLASH_START_ADDRESS + 64*1024)",
+            "application-start-address"        : "(MBED_CONF_APP_FLASH_START_ADDRESS + 65*1024)",
+            "max-application-size"             : "DEFAULT_MAX_APPLICATION_SIZE",
+            "sd.SPI_MOSI"                      : "PTB16",
+            "sd.SPI_MISO"                      : "PTB17",
+            "sd.SPI_CLK"                       : "PTB11",
+            "sd.SPI_CS"                        : "PTB10"
         },
         "MTB_MXCHIP_EMW3166": {
             "target.extra_labels_remove"       : ["WICED"],
@@ -232,7 +279,6 @@
         "MTB_USI_WM_BN_BM_22": {
             "target.extra_labels_remove"       : ["WICED"],
             "target.components_add"            : ["SPIF"],
-            "target.components_remove"         : ["FLASHIAP"],
             "flash-start-address"              : "0x08000000",
             "flash-size"                       : "(1024*1024)",
             "nvstore.area_1_address"           : "(MBED_CONF_APP_FLASH_START_ADDRESS + 48*1024)",
