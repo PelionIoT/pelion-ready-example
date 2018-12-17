@@ -1,4 +1,4 @@
-# Simple Pelion Device Management Client - template application
+# Pelion Device Ready example - template application
 
 (aka Simple Mbed Cloud Client template)
 
@@ -20,7 +20,7 @@ There is a mirror version of the stable (master) template application on [this l
 
 ## Getting started with the application
 
-This is a summary of the process for developers to get started and get a device connected to Pelion Device Management Client.
+This is a summary of the process for developers to get started and get a device connected to Pelion Device Management.
 
 ### Mbed Online IDE
 
@@ -49,7 +49,7 @@ This is a summary of the process for developers to get started and get a device 
 
 ### Requirements
 
-The hardware requirements for Mbed OS platforms to support Pelion Client are [here](https://cloud.mbed.com/docs/current/cloud-requirements/index.html).
+The hardware requirements for Mbed OS platforms to support Pelion Device Management Client are [here](https://cloud.mbed.com/docs/current/cloud-requirements/index.html).
 
 In general, to start creating a secure connected product, you need a microcontroller that has the following features:
 
@@ -58,9 +58,9 @@ In general, to start creating a secure connected product, you need a microcontro
 * True Random Number Generator (TRNG)
 * Real Time Clock (RTC)
 
-Additionally, to use the Device Management Client, the microcontroller needs to support the following in Mbed OS (latest version preferred) or in a compatible driver library:
+Additionally, to use the Pelion Device Management Client, the microcontroller needs to support the following in Mbed OS (latest version preferred) or in a compatible driver library:
 
-* A storage device (SDcard, SPI Flash, Data Flash)
+* A storage device (SDcard, SPI Flash, QSPI Flash, Data Flash)
 * IP connectivity (Ethernet, Wi-Fi, Cellular, 6LoWPAN, Thread)
 
 For the Firmware update over the air (FOTA), you need the following:
@@ -75,285 +75,112 @@ For the Firmware update over the air (FOTA), you need the following:
 * Check which storage options are available [here](https://os.mbed.com/docs/latest/reference/storage.html).
 * Check which network options are available [here](https://os.mbed.com/docs/latest/reference/network-socket.html).
 
+### Adding a new target
 
-### Porting steps
+#### 1. Create new target entry
+Edit the `mbed_app.json` and create a new entry under `target_overrides`:
+   * **Connectivity** - specify default connectivity type for your target. It's essential with targets that lack default connectivity set in targets.json or for targets that support multiple connectivity options. Example:
+   ```
+            "target.network-default-interface-type" : "ETHERNET",
+   ```
+   At the time of this writing, the possible options are `ETHERNET`, `WIFI`, `CELLULAR`.
+   
+   Depending on connectivity type, you might have to specify more config options, e.g. see already defined `CELLULAR` targets in `mbed_app.json`.
 
-Supporting a new derivative platform requires the following steps:
+   * **Storage** - specify storage blockdevice type, which dynamically adds the blockdevice driver you specified at compile time. Example:
+   ```
+            "target.components_add" : ["SD"],
+   ```
+   Valud options are `SD`, `SPIF`, `QSPIF`, `FLASHIAP` (not recommended). Check more available options under https://github.com/ARMmbed/mbed-os/tree/master/components/storage/blockdevice
 
-* Fork the template and create an example application for your platform in https://os.mbed.com/teams/your-team
-* Change the connectivity interface. Ethernet is the default - see `main.cpp`.
-* Change the filesystem and/or the block device for storage. FAT filesystem over SD card is the default. See `main.cpp`.
-* (Optional) Make minor changes in `mbed_app.json` to support multiple platforms with same connectivity and storage.
-* (Recommended) Remove information and files not related to the platform you're porting.
+   You will also have to specify blockdevice pin configuration, which may be very different from one blockdevice type to another. Here's an example for `SD`:
+   ```
+            "sd.SPI_MOSI"                      : "PE_6",
+            "sd.SPI_MISO"                      : "PE_5",
+            "sd.SPI_CLK"                       : "PE_2",
+            "sd.SPI_CS"                        : "PE_4",
+   ```
+   * **Flash** - define the basics for the microcontroller flash, e.g.:
+   ```
+            "flash-start-address"              : "0x08000000",
+            "flash-size"                       : "(2048*1024)",
+   ```
+   * **SOTP** - define 2 SOTP/NVStore regions which will be used for Mbed OS Device Management to store it's special keys which are used to encrypt the data stored on the storage. Use the last 2 Flash sectors (if possible) to ensure that they don't get overwritten when new firmware is applied. Example:
+   ```
+            "sotp-section-1-address"            : "(MBED_CONF_APP_FLASH_START_ADDRESS + MBED_CONF_APP_FLASH_SIZE - 2*(128*1024))",
+            "sotp-section-1-size"               : "(128*1024)",
+            "sotp-section-2-address"            : "(MBED_CONF_APP_FLASH_START_ADDRESS + MBED_CONF_APP_FLASH_SIZE - 1*(128*1024))",
+            "sotp-section-2-size"               : "(128*1024)",
+            "sotp-num-sections" : 2
+   ```
+   `*-address` defines the start of the Flash sector and `*-size` defines the actual sector size. Currently `sotp-num-sections` should always be set to `2`.
 
-<span class="notes">**Note:** Make sure that the application works out-of-the-box and no changes are required in the `main.cpp` file nor `mbed_app.json`. The goal is to deliver a great UX to our developers.</span>
+   Note that these SOTP regions will be used for the next step...
 
-### Porting example
+#### 2. Compile bootloader
 
-In this example, an app with an SD card and on-chip Ethernet is taken to a custom board that has an MCU + Wi-Fi module.
+1. Edit the `bootloader/bootloader_app.json` and specify:
 
-#### Changing the storage option
+   * **Flash** - define the basics for the microcontroller flash (the same as in `mbed_app.json`), e.g.:
+    ```
+            "flash-start-address"              : "0x08000000",
+            "flash-size"                       : "(2048*1024)",
+    ```
 
-<span class="notes">**Note:** From Mbed OS 5.10+, block device drivers have been moved to `mbed-os/components/storage/blockdevice` and many platforms have a default block device interface. </span>
+   * **SOTP** - similar to the **SOTP** step above, specify the location of the SOTP key storage. Note that in the bootloader, the variables are named differently. We should try to use the last 2 Flash sectors (if possible) to ensure that they don't get overwritten when new firmware is applied Example:
+    ```
+            "nvstore.area_1_address"           : "(MBED_CONF_APP_FLASH_START_ADDRESS + MBED_CONF_APP_FLASH_SIZE - 2*(128*1024))",
+            "nvstore.area_1_size"              : "(128*1024)",
+            "nvstore.area_2_address"           : "(MBED_CONF_APP_FLASH_START_ADDRESS + MBED_CONF_APP_FLASH_SIZE - 1*(128*1024))", "nvstore.area_2_size" : "(128*1024)",
+    ```
 
-##### Non-default storage configuration
+    * **Application offset** - specify start address for the application and also the update-client meta info. As these are automatically calculated, you could copy the ones below:
+    ```
+            "update-client.application-details": "(MBED_CONF_APP_FLASH_START_ADDRESS + 64*1024)",
+            "application-start-address"        : "(MBED_CONF_APP_FLASH_START_ADDRESS + 65*1024)",
+            "max-application-size"             : "DEFAULT_MAX_APPLICATION_SIZE",
+    ```
+    
+    * **Storage** - specify blockdevice pin configuration, exactly as you defined it in the `mbed_app.json` file. Example:
+    ```
+            "target.components_add"            : ["SD"],
+            "sd.SPI_MOSI"                      : "PE_6",
+            "sd.SPI_MISO"                      : "PE_5",
+            "sd.SPI_CLK"                       : "PE_2",
+            "sd.SPI_CS"                        : "PE_4"
+    ```
 
-If you wish to override the default storage configuration or add support for storage, you can add the configuration into the `mbed_app.json` file. For example:
+2. Import the official [mbed-bootloader](https://github.com/ARMmbed/mbed-bootloader/) repository or the [mbed-bootloader-extended](https://github.com/ARMmbed/mbed-bootloader-extended/) repository that builds on top of `mbed-bootloader` and extends the support for filesystems and storage drivers. You can do this with ```mbed import mbed-bootloader-extended``` and change your commandline working dir, e.g. `cd mbed-bootloader-extended`.
 
-```json
-    "NUCLEO_F429ZI": {
-        "target.features_add"  : ["STORAGE"],
-        "target.components_add": ["SD"],
-        "sd.SPI_MOSI"  : "PE_6",
-        "sd.SPI_MISO"  : "PE_5",
-        "sd.SPI_CLK"   : "PE_2",
-        "sd.SPI_CS"    : "PE_4"
-    }
+3. Compile the bootloader using the `bootloader_app.json` configuration you just editted:
+   ```
+   mbed compile -t <TOOLCHAIN> -m <TARGET> --profile=tiny.json --app-config=<path to pelion-enablement/bootloader/bootloader_app.json>
+   ```
+
+   Note the following:
+   * `mbed-bootloader` is primarily optimized for `GCC_ARM` and therefore you might want to compile it with that toolchain.
+   * Before jumping to the next step, you should compile and flash the bootloader, and then connect over the virtual comport to ensure that the bootloader is running correctly. You can ignore errors related to checksum verification or falure to jump to application - these are expected at this stage.
+
+#### 3. Include the bootloader
+1. Copy the compiled bootloader from `mbed-bootloader/BUILDS/<TARGET>/<TOOLCHAIN>-TINY/mbed-bootloader.bin` to `pelion-enablement/bootloader/mbed-bootloader-<TARGET>.bin`.
+
+2. Edit `pelion-enablement/mbed_app.json` and modify the target entry to include:
+  ```
+            "target.features_add"              : ["BOOTLOADER"],
+            "target.bootloader_img"            : "bootloader/mbed-bootloader-<TARGET>.bin",
+            "target.app_offset"                : "0x10400",
+            "target.header_offset"             : "0x10000",
+            "update-client.application-details": "(MBED_CONF_APP_FLASH_START_ADDRESS + 64*1024)",
+   ```
+ 
+   Note that:
+   * `update-client.application-details` should be identical in both `bootloader_app.json` and `mbed_app.json`
+   * `target.app_offset` is relative offset to `flash-start-address` you specified in the `mbed_app.json` and `bootloader_app.json`, and is the hex value of the offset specified by `application-start-address` in `bootloader_app.json`, e.g. `(MBED_CONF_APP_FLASH_START_ADDRESS+65*1024)` dec equals `0x10400` hex.
+   * `target.header_offset` is also relative offset to the `flash-start-address` you specified in the `bootloader_app.json`, and is the hex value of the offset specified by `update-client.application-details`, e.g. `(MBED_CONF_APP_FLASH_START_ADDRESS+64*1024)` dec equals `0x10000` hex.
+
+7. Finally, re-run all tests with:
 ```
-
-##### Example of default storage configuration using Mbed OS 5.10+
-
-1. Include the header files for the FAT file system:
-
-    ```cpp
-    #include "FATFileSystem.h"
-    ```
-
-2. Declare the global object for the default block device driver:
-
-    ```cpp
-    BlockDevice* bd = BlockDevice::get_default_instance();
-    ```
-
-3. Declare the global objects for the file system:
-
-    ```cpp
-    FATFileSystem fs("sd", bd);
-    ```
-
-##### Example of SD card configuration using Mbed OS 5.9 and older
-
-1. Add the SD card driver (`sd-driver.lib`) if it is not already added. On the command line:
-
-    ```
-    mbed add https://github.com/armmbed/sd-driver
-    ```
-
-2. Include the header files for the SD driver and FAT file system:
-
-    ```cpp
-    #include "SDBlockDevice.h"
-    #include "FATFileSystem.h"
-    ```
-
-3. Declare the global objects for the SD card and file system:
-
-    ```cpp
-    SDBlockDevice bd(SPI_MOSI, SPI_MISO, SPI_CLK, SPI_CS);
-    FATFileSystem fs("sd", &sd);
-    ```
-
-<span class="notes">**Note:** The `SPI_*` macros represent the pin names. The names can be defined in a variety of places including the sd-driver, your project’s configuration file (`mbed_app.json`) or the `pinnames.h` file for the target that defines the default pin names. You can use other pin names depending on the platform and the connections.</span>
-
-For example, if the SPI signals for the SD card interface are connected on an Arduino compatible shield, you may define them like this:
-
-```cpp
-SDBlockDevice sd(D11, D12, D13, D10);
-```
-
-<span class="notes">**Note:** The default mounting point is `sd`. This can be overridden in the `mbed_app.json` file using `PAL_FS_MOUNT_POINT_PRIMARY` and `PAL_FS_MOUNT_POINT_SECONDARY`. See [documentation](https://cloud.mbed.com/docs/current/porting/port-filesystem.html).</span>
-
-##### For SPI Flash (devices that support SFDP)
-
-<Please note that this section of the document is under construction.  More information is needed.>
-
-1. Add the SPI Flash driver (`spif-driver`) if it is not already added:
-
-    ```
-    mbed add https://github.com/armmbed/spif-driver
-    ```
-
-2. Include the header files for the SPI Flash driver and LitteFS file system. For SPI Flash, we recommend LittleFS file system which supports wear leveling:
-
-    ```cpp
-    #include "SPIFBlockDevice.h"
-    #include "LittleFileSystem.h"
-    ```
-
-3. Declare the global objects for the SD card and file system:
-
-    ```cpp
-    SPIFBlockDevice spif(SPI_MOSI, SPI_MISO, SPI_CLK, SPI_CS);
-    LittleFileSystem fs("fs", &spif);
-    ```
-
-4. Update the construction of the `SimpleMbedCloudClient` object to pass in the file system and block device:
-
-    ```cpp
-    SimpleMbedCloudClient client(&net, &spif, &fs);
-    ```
-
-#### Changing the network interface
-
-<span class="notes">**Note:** From Mbed OS 5.10, platforms have a default network interface defined in `mbed-os/targets/targets.json`. If you wish to override the default configuration, you can add the configuration into the `mbed_app.json` file.</span>
-
-##### Non-default network configuration
-
-If you wish to override the default network configuration, you can add the configuration into the `mbed_app.json` file. For example:
-
-```json
-    "NUCLEO_F429ZI": {
-        "target.network-default-interface-type" : "WIFI",
-        "esp8266.rx"                            : "D0",
-        "esp8266.tx"                            : "D1",
-        "esp8266.provide-default"               : true,
-        "nsapi.default-wifi-security"           : "WPA_WPA2",
-        "nsapi.default-wifi-ssid"               : "\"SSID\"",
-        "nsapi.default-wifi-password"          : "\"Password\""
-    }
-```
-
-##### Example of network initialization for Ethernet using Mbed OS 5.10+
-
-1. Declare the network interface object:
-
-    ```
-    EthernetInterface * net = NetworkInterface::get_default_instance();
-    ```
-
-2. Connect the interface:
-
-    ```
-    status = net->connect();
-    ```
-
-3. When the Client is started, pass the network interface:
-    ```
-    SimpleMbedCloudClient client(net, &sd, &fs);
-    ```
-
-##### Example of network initialization for Wi-Fi using Mbed OS 5.10+
-
-1. Declare the network interface object:
-
-    ```
-    WiFiInterface *net = WiFiInterface::get_default_instance();
-    ```
-
-2. Connect the interface:
-
-    ```
-    status  = net->connect(MBED_CONF_APP_WIFI_SSID, MBED_CONF_APP_WIFI_PASSWORD, NSAPI_SECURITY_WPA_WPA2);
-    ```
-
-3. When the Client is started, pass the network interface:
-
-    ```
-    SimpleMbedCloudClient client(net, &sd, &fs);
-    ```
-
-
-##### Example of network initialization for Ethernet using Mbed OS 5.9 and older versions
-
-The Ethernet interface is included within Mbed OS, so you do not need to add a library.
-
-1. Include the header file for the interface:
-
-    ```
-    #include "EthernetInterface.h"
-    ```
-
-2. Declare the network interface object:
-
-    ```
-    EthernetInterface net;
-    ```
-
-3. Connect the interface:
-
-    ```
-    status = net.connect();
-    ```
-
-4. When the Client is started, pass the network interface:
-
-    ```
-    SimpleMbedCloudClient client(&net, &sd, &fs);
-    ```
-
-##### Example of network initialization for Wi-Fi using Mbed OS 5.9 and older versions
-
-This example references the ESP8266 Wi-Fi module, but the instructions are applicable to other modules.
-
-1. Add the ESP8266 Wi-Fi interface driver (esp8266-driver) if it is not already added:
-
-    ```
-    mbed add https://github.com/ARMmbed/esp8266-driver
-    ```
-
-    <span class="notes">**Note:** You may have to update the firmware inside the ESP8266 module.</span>
-
-2. Include the header file for the interface:
-
-    ```cpp
-    #include "ESP8266Interface.h"
-    ```
-
-3. Declare the network interface object:
-
-    ```cpp
-    ESP8266Interface net(D1, D0);
-    ```
-
-4. Connect the interface:
-
-    ```cpp
-    nsapi_error_t status = net.connect(MBED_CONF_APP_WIFI_SSID, MBED_CONF_APP_WIFI_PASSWORD, NSAPI_SECURITY_WPA_WPA2);
-    ```
-
-5. When the Client is started, pass the network interface:
-
-    ```cpp
-    SimpleMbedCloudClient client(&net, &sd, &fs);
-    ```
-
-6. Add the Wi-Fi credentials information in `mbed_app.json` (located at the top level of the example project):
-
-    ```json
-        "config": {
-            "wifi-ssid": {
-                "help": "WiFi SSID",
-                "value": "\"SSID\""
-            },
-            "wifi-password": {
-                "help": "WiFi Password",
-                "value": "\"PASSWORD\""
-            }
-        }
-    ```
-
-#### Changing the target MCU
-
-To change the target board to another board that is supported by Mbed OS, simply change the target name.
-
-##### Using the command line
-
-Use the -m option. For example:
-
-```
-mbed compile -m Hexiwear -t GCC_ARM
-```
-
-##### Using the online compiler
-
-Click the platform name on the top right corner, then select another platform.
-
-##### Using an IDE
-
-First re-export (create project files) for the target with the command line. For example:
-
-```
-mbed export -m Hexiwear -i uvision
+mbed test -t <TOOLCHAIN> -m <TARGET> -n simple-mbed-cloud-client-tests-dev_mgmt*
 ```
 
 #### Creating a custom target board
@@ -401,36 +228,6 @@ If you want to change this to an actual button, here is how to do it:
 
 3. Rename `fake_button_press` to `real_button_press`.
 
-
-#### Pelion Client v1.3.x SOTP-specific changes
-
-The version v1.3+ introduces a new feature called Software One-Time Programming (SOTP) that makes use of the internal flash of the MCU as an One-Time-Programmable section. It stores the keys required to decrypt the credentials stored in the persistent storage. Read more on this in the [porting documentation](https://cloud.mbed.com/docs/current/porting/changing-a-customized-porting-layer.html#rtos-module) under the RTOS module section.
-
-The flash must be divided into two sections (default 2, maximum 2) for your target. You need to modify the `mbed_app.json` file as follows:
-
-1. Add a section to the `target_overrides` with SOTP addresses and sizes.
-
-    You can find the memory map information in the reference manual of your MCU. Note the sectors should be placed at the last two sectors of the flash, so the SOTP region is preserved during drag and drop programming of binaries. This is an example for the NUCLEO_F429ZI board:
-
-    ```json
-        "NUCLEO_F429ZI": {
-            "app.sotp-section-1-address": "(0x081C0000)",
-            "app.sotp-section-1-size"   : "(128*1024)",
-            "app.sotp-section-2-address": "(0x081E0000)",
-            "app.sotp-section-2-size"   : "(128*1024)"
-        }
-    ```
-
-2. Add the macro definition to the "config" section. Note that the address and size macros are already provided. You only need to add the macro for the number of sections:
-
-    ```json
-        "sotp-num-sections": {
-            "help": "Number of SOTP sections",
-            "macro_name": "PAL_INT_FLASH_NUM_SECTIONS",
-            "value": null
-        }
-    ```
-
 ## Enabling firmware updates
 
 Mbed OS 5.10 and Mbed CLI 1.8 simplifies the process to enable and perform Firmware Updates. Here is a summary on how to configure the device and verify its correct behaviour.
@@ -444,48 +241,6 @@ For full documentation about bootloaders and firmware update, read the following
 - [Updating devices with Arm Mbed CLI](https://os.mbed.com/docs/latest/tools/cli-update.html)
 
 This is a summary to use Arm Mbed OS managed bootloaders.
-
-#### Preparing a bootloader
-
-If Mbed OS contains a default pre-built bootloader in `mbed-os/feature/FEATURE_BOOTLOADER`, then you can skip this section.
-
-Otherwise, you'll need to compile the [mbed-bootloader](https://github.com/armmbed/mbed-bootloader) and add it to your application. Once it's done, we recommend to send a Pull-Requests to [Mbed OS](https://github.com/ARMmbed/mbed-os) to contribute with a default bootloader for your Mbed Enabled platform.
-
-You can see an example of bootloader configuration for the `NUCLEO_F429ZI` in `bootloader/mbed_app.json`. This is compatible with the `mbed_app.json` configuration in this template application.
-
-<span class="notes">**Note:** Make sure the configuration for the bootloader (`mbed_app.json`) corresponds with the configuration of your application's `mbed_app.json`, otherwise the bootloader may not be able to find an application or apply the new firmware.</span>
-
-#### Enabling the application to use a bootloader
-
-##### Option 1: default & prebuilt bootloader
-
-If Mbed OS contains a prebuilt bootloader for the target, then you can indicate to use it in the `mbed_app.json`. For example:
-
-```
-    {
-        "target_overrides": {
-            "K64F": {
-                "target.features_add": ["BOOTLOADER"]
-            }
-        }
-    }
-```
-
-##### Option 2: custom bootloader
-
-If you'd like to overide a default bootloader or use a custom one available in the application, then indicate the path to the booloader, `app_offset` and `header_offset` parameters in `mbed_app.json`. For example:
-
-```
-    "target_overrides": {
-            "K64F": {
-                "target.app_offset": "0xa400",
-                "target.header_offset": "0xa000",
-                "target.bootloader_img": "bootloader/my_bootloader.bin"
-            }
-        }
-```
-
-You may need to specify `header_format` as well. You could include the default header format from [Mbed OS](https://github.com/ARMmbed/mbed-os/blob/master/features/FEATURE_BOOTLOADER/mbed_lib.json) by adding `"target.features_add": ["BOOTLOADER"]`.
 
 #### Verifying that firmware update works
 
