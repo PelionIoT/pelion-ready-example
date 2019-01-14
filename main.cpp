@@ -36,9 +36,7 @@ FATFileSystem fs("fs", bd);
 LittleFileSystem fs("fs", bd);
 #endif
 
-// Define USE_BUTTON if the board supports user button, which will be used for the GET example
-//#define USE_BUTTON
-#ifdef USE_BUTTON
+#if USE_BUTTON == 1
 InterruptIn button(BUTTON1);
 #endif /* USE_BUTTON */
 
@@ -46,15 +44,15 @@ InterruptIn button(BUTTON1);
 DigitalOut led(LED1);
 
 // Declaring pointers for access to Pelion Device Management Client resources outside of main()
-MbedCloudClientResource *res_button;
-MbedCloudClientResource *res_led;
+MbedCloudClientResource *button_res;
+MbedCloudClientResource *led_res;
 
 // An event queue is a very useful structure to debounce information between contexts (e.g. ISR and normal threads)
 // This is great because things such as network operations are illegal in ISR, so updating a resource in a button's fall() function is not allowed
 EventQueue eventQueue;
 
 /**
- * PUT handler
+ * PUT handler - sets the value of the built-in LED
  * @param resource The resource that triggered the callback
  * @param newValue Updated value for the resource
  */
@@ -64,15 +62,18 @@ void led_put_callback(MbedCloudClientResource *resource, m2m::String newValue) {
 }
 
 /**
- * POST handler
+ * POST handler - prints the content of the payload
  * @param resource The resource that triggered the callback
  * @param buffer If a body was passed to the POST function, this contains the data.
  *               Note that the buffer is deallocated after leaving this function, so copy it if you need it longer.
  * @param size Size of the body
  */
-void led_post_callback(MbedCloudClientResource *resource, const uint8_t *buffer, uint16_t size) {
-    printf("POST received. Payload: %s\n", res_led->get_value().c_str());
-    led = atoi(res_led->get_value().c_str());
+void post_callback(MbedCloudClientResource *resource, const uint8_t *buffer, uint16_t size) {
+    printf("POST received (length %u). Payload: ", size);
+    for (size_t ix = 0; ix < size; ix++) {
+        printf("%02x ", buffer[ix]);
+    }
+    printf("\n");
 }
 
 /**
@@ -80,8 +81,8 @@ void led_post_callback(MbedCloudClientResource *resource, const uint8_t *buffer,
  * This function will be triggered either by a physical button press or by a ticker every 5 seconds (see below)
  */
 void button_press() {
-    int v = res_button->get_value_int() + 1;
-    res_button->set_value(v);
+    int v = button_res->get_value_int() + 1;
+    button_res->set_value(v);
     printf("Button clicked %d times\n", v);
 }
 
@@ -105,21 +106,11 @@ void registered(const ConnectorClientEndpointInfo *endpoint) {
 int main(void) {
     printf("\nStarting Simple Pelion Device Management Client example\n");
 
-#ifdef USE_BUTTON
+#if USE_BUTTON == 1
     // If the User button is pressed ons start, then format storage.
-    DigitalIn *user_button = new DigitalIn(BUTTON1);
-    const int PRESSED = 1;
-    if (user_button->read() == PRESSED) {
+    if (button.read() == MBED_CONF_APP_BUTTON_PRESSED_STATE) {
         printf("User button is pushed on start. Formatting the storage...\n");
-        int storage_status = fs.reformat(bd);
-        if (storage_status != 0) {
-            if (bd->erase(0, bd->size()) == 0) {
-                if (fs.format(bd) == 0) {
-                    storage_status = 0;
-                    printf("The storage reformatted successfully.\n");
-                }
-            }
-        }
+        int storage_status = StorageHelper::format(&fs, bd);
         if (storage_status != 0) {
             printf("ERROR: Failed to reformat the storage (%d).\n", storage_status);
         }
@@ -132,19 +123,9 @@ int main(void) {
     printf("Connecting to the network using the default network interface...\n");
     net = NetworkInterface::get_default_instance();
 
-    nsapi_error_t net_status = -1;
-    for (int tries = 0; tries < 3; tries++) {
-        net_status = net->connect();
-        if (net_status == NSAPI_ERROR_OK) {
-            break;
-        } else {
-            printf("Unable to connect to network. Retrying...\n");
-        }
-    }
-
-    if (net_status != NSAPI_ERROR_OK) {
-        printf("ERROR: Connecting to the network failed (%d)!\n", net_status);
-        return -1;
+    nsapi_error_t net_status = NSAPI_ERROR_NO_CONNECTION;
+    while ((net_status = net->connect()) != NSAPI_ERROR_OK) {
+        printf("Unable to connect to network (%d). Retrying...\n", net_status);
     }
 
     printf("Connected to the network successfully. IP address: %s\n", net->get_ip_address());
@@ -160,16 +141,20 @@ int main(void) {
     }
 
     // Creating resources, which can be written or read from the cloud
-    res_button = client.create_resource("3200/0/5501", "button_count");
-    res_button->set_value(0);
-    res_button->methods(M2MMethod::GET);
-    res_button->observable(true);
-    res_button->attach_notification_callback(button_callback);
+    button_res = client.create_resource("3200/0/5501", "button_count");
+    button_res->set_value(0);
+    button_res->methods(M2MMethod::GET);
+    button_res->observable(true);
+    button_res->attach_notification_callback(button_callback);
 
-    res_led = client.create_resource("3201/0/5853", "led_state");
-    res_led->set_value(1);
-    res_led->methods(M2MMethod::GET | M2MMethod::PUT | M2MMethod::POST);
-    res_led->attach_put_callback(led_put_callback);
+    led_res = client.create_resource("3201/0/5853", "led_state");
+    led_res->set_value(led.read());
+    led_res->methods(M2MMethod::GET | M2MMethod::PUT);
+    led_res->attach_put_callback(led_put_callback);
+
+    led_res = client.create_resource("3300/0/5605", "execute_function");
+    led_res->methods(M2MMethod::POST);
+    led_res->attach_post_callback(post_callback);
 
     printf("Initialized Pelion Device Management Client. Registering...\n");
 
@@ -179,12 +164,7 @@ int main(void) {
     // Register with Pelion DM
     client.register_and_connect();
 
-    int i = 600; // wait up 60 seconds before attaching sensors and button events
-    while (i-- > 0 && !client.is_client_registered()) {
-        wait_ms(100);
-    }
-
-#ifdef USE_BUTTON
+#if USE_BUTTON == 1
     // The button fires on an interrupt context, but debounces it to the eventqueue, so it's safe to do network operations
     button.fall(eventQueue.event(&button_press));
     printf("Press the user button to increment the LwM2M resource value...\n");

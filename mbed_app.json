@@ -18,8 +18,8 @@
             "update-client.storage-locations"   : "1",
             "mbed-trace.enable"                 : null,
             "nsapi.default-wifi-security"       : "WPA_WPA2",
-            "nsapi.default-wifi-ssid"           : "\"SSID\"",
-            "nsapi.default-wifi-password"       : "\"Password\""
+            "nsapi.default-wifi-ssid"           : "\"Jan iPhone\"",
+            "nsapi.default-wifi-password"       : "\"mbedcloud\""
         },
         "K64F": {
             "target.features_add"               : ["BOOTLOADER"],
@@ -127,7 +127,8 @@
             "update-client.application-details" : "(MBED_CONF_APP_FLASH_START_ADDRESS + 64*1024)",
             "update-client.storage-address"     : "(1024*1024*2)",
             "update-client.storage-size"        : "(1024*1024*2)",
-            "update-client.storage-locations"   : 1
+            "update-client.storage-locations"   : 1,
+            "button-pressed-state"              : 0
         },
         "DISCO_F413ZH": {
             "target.features_add"               : ["BOOTLOADER"],
@@ -310,7 +311,8 @@
             "target.bootloader_img"             : "bootloader/mbed-bootloader-UBLOX_C030_U201.bin",
             "target.header_offset"              : "0x10000",
             "target.app_offset"                 : "0x10400",
-            "update-client.application-details" : "(MBED_CONF_APP_FLASH_START_ADDRESS + 64*1024)"
+            "update-client.application-details" : "(MBED_CONF_APP_FLASH_START_ADDRESS + 64*1024)",
+            "use-button"                        : false
         },
         "MTB_MXCHIP_EMW3166": {
             "target.features_add"               : ["BOOTLOADER"],
@@ -366,6 +368,15 @@
         },
         "developer-mode": {
             "help": "Enable Developer mode to skip Factory enrollment",
+            "value": 1
+        },
+        "use-button": {
+            "help": "Whether the target has a button",
+            "macro_name": "USE_BUTTON",
+            "value": true
+        },
+        "button-pressed-state": {
+            "help": "Value of the button when pressed",
             "value": 1
         },
         "main-stack-size": {
