@@ -20,68 +20,71 @@
 #include "mbed.h"
 #include "simple-mbed-cloud-client.h"
 #include "FATFileSystem.h"
+#include "LittleFileSystem.h"
+
+// Default network interface object. Don't forget to change the WiFi SSID/password in mbed_app.json if you're using WiFi.
+NetworkInterface *net = NetworkInterface::get_default_instance();
+
+// Default block device available on the target board
+BlockDevice *bd = BlockDevice::get_default_instance();
+
+#if COMPONENT_SD || COMPONENT_NUSD
+// Use FATFileSystem for SD card type blockdevices
+FATFileSystem fs("fs", bd);
+#else
+// Use LittleFileSystem for non-SD block devices to enable wear leveling and other functions
+LittleFileSystem fs("fs", bd);
+#endif
+
+#if USE_BUTTON == 1
+InterruptIn button(BUTTON1);
+#endif /* USE_BUTTON */
+
+// Default LED to use for PUT/POST example
+DigitalOut led(LED1);
+
+// Declaring pointers for access to Pelion Device Management Client resources outside of main()
+MbedCloudClientResource *button_res;
+MbedCloudClientResource *led_res;
+MbedCloudClientResource *post_res;
 
 // An event queue is a very useful structure to debounce information between contexts (e.g. ISR and normal threads)
 // This is great because things such as network operations are illegal in ISR, so updating a resource in a button's fall() function is not allowed
 EventQueue eventQueue;
 
-// Default block device
-BlockDevice *bd = BlockDevice::get_default_instance();
-FATFileSystem fs("fs");
-
-// Default network interface object
-NetworkInterface *net = NetworkInterface::get_default_instance();
-
-// Declaring pointers for access to Pelion Device Management Client resources outside of main()
-MbedCloudClientResource *button_res;
-MbedCloudClientResource *pattern_res;
-
-// This function gets triggered by the timer. It's easy to replace it by an InterruptIn and fall() mode on a real button
-void fake_button_press() {
-    int v = button_res->get_value_int() + 1;
-
-    button_res->set_value(v);
-
-    printf("Simulated button clicked %d times\n", v);
-}
-
 /**
- * PUT handler
+ * PUT handler - sets the value of the built-in LED
  * @param resource The resource that triggered the callback
  * @param newValue Updated value for the resource
  */
-void pattern_updated(MbedCloudClientResource *resource, m2m::String newValue) {
-    printf("PUT received, new value: %s\n", newValue.c_str());
+void put_callback(MbedCloudClientResource *resource, m2m::String newValue) {
+    printf("PUT received. New value: %s\n", newValue.c_str());
+    led = atoi(newValue.c_str());
 }
 
 /**
- * POST handler
+ * POST handler - prints the content of the payload
  * @param resource The resource that triggered the callback
  * @param buffer If a body was passed to the POST function, this contains the data.
  *               Note that the buffer is deallocated after leaving this function, so copy it if you need it longer.
  * @param size Size of the body
  */
-void blink_callback(MbedCloudClientResource *resource, const uint8_t *buffer, uint16_t size) {
-    printf("POST received. Going to blink LED pattern: %s\n", pattern_res->get_value().c_str());
-
-    static DigitalOut augmentedLed(LED1); // LED that is used for blinking the pattern
-
-    // Parse the pattern string, and toggle the LED in that pattern
-    string s = std::string(pattern_res->get_value().c_str());
-    size_t i = 0;
-    size_t pos = s.find(':');
-    while (pos != string::npos) {
-        wait_ms(atoi(s.substr(i, pos - i).c_str()));
-        augmentedLed = !augmentedLed;
-
-        i = ++pos;
-        pos = s.find(':', pos);
-
-        if (pos == string::npos) {
-            wait_ms(atoi(s.substr(i, s.length()).c_str()));
-            augmentedLed = !augmentedLed;
-        }
+void post_callback(MbedCloudClientResource *resource, const uint8_t *buffer, uint16_t size) {
+    printf("POST received (length %u). Payload: ", size);
+    for (size_t ix = 0; ix < size; ix++) {
+        printf("%02x ", buffer[ix]);
     }
+    printf("\n");
+}
+
+/**
+ * Button handler
+ * This function will be triggered either by a physical button press or by a ticker every 5 seconds (see below)
+ */
+void button_press() {
+    int v = button_res->get_value_int() + 1;
+    button_res->set_value(v);
+    printf("Button clicked %d times\n", v);
 }
 
 /**
@@ -98,22 +101,37 @@ void button_callback(MbedCloudClientResource *resource, const NoticationDelivery
  * @param endpoint Information about the registered endpoint such as the name (so you can find it back in portal)
  */
 void registered(const ConnectorClientEndpointInfo *endpoint) {
-    printf("Connected to Pelion Device Management. Endpoint Name: %s\n", endpoint->internal_endpoint_name.c_str());
+    printf("Registered to Pelion Device Management. Endpoint Name: %s\n", endpoint->internal_endpoint_name.c_str());
 }
 
 int main(void) {
-    printf("Starting Simple Pelion Device Management Client example\n");
-    printf("Connecting to the network...\n");
+    printf("\nStarting Simple Pelion Device Management Client example\n");
 
-    // Connect to the internet (DHCP is expected to be on)
-    nsapi_error_t status = net->connect();
+#if USE_BUTTON == 1
+    // If the User button is pressed ons start, then format storage.
+    if (button.read() == MBED_CONF_APP_BUTTON_PRESSED_STATE) {
+        printf("User button is pushed on start. Formatting the storage...\n");
+        int storage_status = StorageHelper::format(&fs, bd);
+        if (storage_status != 0) {
+            printf("ERROR: Failed to reformat the storage (%d).\n", storage_status);
+        }
+    } else {
+        printf("You can hold the user button during boot to format the storage and change the device identity.\n");
+    }
+#endif /* USE_BUTTON */
 
-    if (status != NSAPI_ERROR_OK) {
-        printf("Connecting to the network failed %d!\n", status);
-        return -1;
+    // Connect to the Internet (DHCP is expected to be on)
+    printf("Connecting to the network using the default network interface...\n");
+    net = NetworkInterface::get_default_instance();
+
+    nsapi_error_t net_status = NSAPI_ERROR_NO_CONNECTION;
+    while ((net_status = net->connect()) != NSAPI_ERROR_OK) {
+        printf("Unable to connect to network (%d). Retrying...\n", net_status);
     }
 
     printf("Connected to the network successfully. IP address: %s\n", net->get_ip_address());
+
+    printf("Initializing Pelion Device Management Client...\n");
 
     // SimpleMbedCloudClient handles registering over LwM2M to Pelion Device Management
     SimpleMbedCloudClient client(net, bd, &fs);
@@ -130,29 +148,36 @@ int main(void) {
     button_res->observable(true);
     button_res->attach_notification_callback(button_callback);
 
-    pattern_res = client.create_resource("3201/0/5853", "blink_pattern");
-    pattern_res->set_value("500:500:500:500:500:500:500:500");
-    pattern_res->methods(M2MMethod::GET | M2MMethod::PUT);
-    pattern_res->attach_put_callback(pattern_updated);
+    led_res = client.create_resource("3201/0/5853", "led_state");
+    led_res->set_value(led.read());
+    led_res->methods(M2MMethod::GET | M2MMethod::PUT);
+    led_res->attach_put_callback(put_callback);
 
-    MbedCloudClientResource *blink_res = client.create_resource("3201/0/5850", "blink_action");
-    blink_res->methods(M2MMethod::POST);
-    blink_res->attach_post_callback(blink_callback);
+    post_res = client.create_resource("3300/0/5605", "execute_function");
+    post_res->methods(M2MMethod::POST);
+    post_res->attach_post_callback(post_callback);
 
-    printf("Initialized Pelion Client. Registering...\n");
+    printf("Initialized Pelion Device Management Client. Registering...\n");
 
     // Callback that fires when registering is complete
     client.on_registered(&registered);
 
-    // Register with Pelion Device Management
+    // Register with Pelion DM
     client.register_and_connect();
 
-    // Placeholder for callback to update local resource when GET comes.
+#if USE_BUTTON == 1
+    // The button fires on an interrupt context, but debounces it to the eventqueue, so it's safe to do network operations
+    button.fall(eventQueue.event(&button_press));
+    printf("Press the user button to increment the LwM2M resource value...\n");
+#else
     // The timer fires on an interrupt context, but debounces it to the eventqueue, so it's safe to do network operations
     Ticker timer;
-    timer.attach(eventQueue.event(&fake_button_press), 5.0);
+    timer.attach(eventQueue.event(&button_press), 5.0);
+    printf("Simulating button press every 5 seconds...\n");
+#endif /* USE_BUTTON */
 
     // You can easily run the eventQueue in a separate thread if required
     eventQueue.dispatch_forever();
 }
-#endif
+
+#endif /* MBED_TEST_MODE */

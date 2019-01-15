@@ -6,35 +6,36 @@
         "MBED_CLOUD_CLIENT_USER_CONFIG_FILE=\"mbed_cloud_client_user_config.h\"",
         "PAL_USER_DEFINED_CONFIGURATION=\"sotp_fs_config_MbedOS.h\"",
         "PAL_FS_MOUNT_POINT_PRIMARY=\"/fs\"",
-        "MBEDTLS_USER_CONFIG_FILE=\"mbedTLSConfig_mbedOS.h\"",
-        "PAL_DTLS_PEER_MIN_TIMEOUT=5000"
+        "MBEDTLS_USER_CONFIG_FILE=\"mbedTLSConfig_mbedOS.h\""
     ],
     "target_overrides": {
         "*": {
+            "target.features_add"               : ["BOOTLOADER"],
+            "update-client.storage-address"     : "(64*1024*1024)",
+            "update-client.storage-size"        : "(2*1024*1024)",
+            "update-client.storage-locations"   : "1",
+            "update-client.application-details" : "(MBED_CONF_APP_FLASH_START_ADDRESS + 64*1024)",
+            "target.header_offset"              : "0x10000",
+            "target.app_offset"                 : "0x10400",
             "platform.stdio-baud-rate"          : 115200,
             "platform.stdio-convert-newlines"   : true,
-            "update-client.storage-address"     : "(1024*1024*64)",
-            "update-client.storage-size"        : "(1024*1024*2)",
-            "update-client.storage-locations"   : "1",
+            "client_app.pal_dtls_peer_min_timeout" : 5000,
             "mbed-trace.enable"                 : null,
             "nsapi.default-wifi-security"       : "WPA_WPA2",
             "nsapi.default-wifi-ssid"           : "\"SSID\"",
-            "nsapi.default-wifi-password"       : "\"PASSWORD\""
+            "nsapi.default-wifi-password"       : "\"Password\""
         },
         "K64F": {
-            "target.features_add"               : ["BOOTLOADER"],
             "target.components_add"             : ["SD"],
             "flash-start-address"               : "0x0",
-            "flash-size"                        : "(2048*1024)",
-            "sotp-section-1-address"            : "(32*1024)",
+            "flash-size"                        : "(1024*1024)",
+            "sotp-section-1-address"            : "(MBED_CONF_APP_FLASH_START_ADDRESS + MBED_CONF_APP_FLASH_SIZE - 2*(4*1024))",
             "sotp-section-1-size"               : "(4*1024)",
-            "sotp-section-2-address"            : "(36*1024)",
+            "sotp-section-2-address"            : "(MBED_CONF_APP_FLASH_START_ADDRESS + MBED_CONF_APP_FLASH_SIZE - 1*(4*1024))",
             "sotp-section-2-size"               : "(4*1024)",
-            "sotp-num-sections"                 : 2,
-            "update-client.application-details" : "(MBED_CONF_APP_FLASH_START_ADDRESS + 40*1024)"
+            "target.bootloader_img"             : "bootloader/mbed-bootloader-K64F.bin"
         },
         "K66F": {
-            "target.features_add"               : ["BOOTLOADER"],
             "target.components_add"             : ["SD"],
             "flash-start-address"               : "0x0",
             "flash-size"                        : "(2048*1024)",
@@ -42,71 +43,66 @@
             "sotp-section-1-size"               : "(4*1024)",
             "sotp-section-2-address"            : "(MBED_CONF_APP_FLASH_START_ADDRESS + MBED_CONF_APP_FLASH_SIZE - 1*(4*1024))",
             "sotp-section-2-size"               : "(4*1024)",
-            "sotp-num-sections"                 : 2,
-            "target.bootloader_img"             : "bootloader/mbed-bootloader-K66F.bin",
-            "target.header_offset"              : "0x10000",
-            "target.app_offset"                 : "0x10400",
-            "update-client.application-details" : "(MBED_CONF_APP_FLASH_START_ADDRESS + 64*1024)"
+            "target.bootloader_img"             : "bootloader/mbed-bootloader-K66F.bin"
         },
         "NUCLEO_F429ZI": {
-            "target.features_add"               : ["BOOTLOADER"],
             "target.components_add"             : ["SD"],
-            "sd.SPI_MOSI"                       : "PE_6",
-            "sd.SPI_MISO"                       : "PE_5",
-            "sd.SPI_CLK"                        : "PE_2",
-            "sd.SPI_CS"                         : "PE_4",
+            "sd.SPI_MOSI"                       : "PC_12",
+            "sd.SPI_MISO"                       : "PC_11",
+            "sd.SPI_CLK"                        : "PC_10",
+            "sd.SPI_CS"                         : "PC_9",
             "flash-start-address"               : "0x08000000",
             "flash-size"                        : "(2048*1024)",
             "sotp-section-1-address"            : "(MBED_CONF_APP_FLASH_START_ADDRESS + MBED_CONF_APP_FLASH_SIZE - 2*(128*1024))",
             "sotp-section-1-size"               : "(128*1024)",
             "sotp-section-2-address"            : "(MBED_CONF_APP_FLASH_START_ADDRESS + MBED_CONF_APP_FLASH_SIZE - 1*(128*1024))",
             "sotp-section-2-size"               : "(128*1024)",
-            "sotp-num-sections"                 : 2,
-            "target.bootloader_img"             : "bootloader/mbed-bootloader-NUCLEO_F429ZI.bin",
-            "target.header_offset"              : "0x10000",
-            "target.app_offset"                 : "0x10400",
-            "update-client.application-details" : "(MBED_CONF_APP_FLASH_START_ADDRESS + 64*1024)"
+            "target.bootloader_img"             : "bootloader/mbed-bootloader-NUCLEO_F429ZI.bin"
         },
         "NUCLEO_F767ZI": {
-            "target.features_add"               : ["BOOTLOADER"],
             "target.components_add"             : ["SD"],
-            "sd.SPI_MOSI"                       : "PE_6",
-            "sd.SPI_MISO"                       : "PE_5",
-            "sd.SPI_CLK"                        : "PE_2",
-            "sd.SPI_CS"                         : "PE_4",
+            "sd.SPI_MOSI"                       : "PC_12",
+            "sd.SPI_MISO"                       : "PC_11",
+            "sd.SPI_CLK"                        : "PC_10",
+            "sd.SPI_CS"                         : "PC_9",
             "flash-start-address"               : "0x08000000",
             "flash-size"                        : "(2048*1024)",
             "sotp-section-1-address"            : "(MBED_CONF_APP_FLASH_START_ADDRESS + MBED_CONF_APP_FLASH_SIZE - 2*(256*1024))",
             "sotp-section-1-size"               : "(256*1024)",
             "sotp-section-2-address"            : "(MBED_CONF_APP_FLASH_START_ADDRESS + MBED_CONF_APP_FLASH_SIZE - 1*(256*1024))",
             "sotp-section-2-size"               : "(256*1024)",
-            "sotp-num-sections"                 : 2,
-            "target.bootloader_img"             : "bootloader/mbed-bootloader-NUCLEO_F767ZI.bin",
-            "target.header_offset"              : "0x10000",
-            "target.app_offset"                 : "0x10400",
-            "update-client.application-details" : "(MBED_CONF_APP_FLASH_START_ADDRESS + 64*1024)"
+            "target.bootloader_img"             : "bootloader/mbed-bootloader-NUCLEO_F767ZI.bin"
         },
         "NUCLEO_F746ZG": {
-            "target.features_add"               : ["BOOTLOADER"],
             "target.components_add"             : ["SD"],
-            "sd.SPI_MOSI"                       : "PE_6",
-            "sd.SPI_MISO"                       : "PE_5",
-            "sd.SPI_CLK"                        : "PE_2",
-            "sd.SPI_CS"                         : "PE_4",
+            "sd.SPI_MOSI"                       : "PC_12",
+            "sd.SPI_MISO"                       : "PC_11",
+            "sd.SPI_CLK"                        : "PC_10",
+            "sd.SPI_CS"                         : "PC_9",
             "flash-start-address"               : "0x08000000",
             "flash-size"                        : "(1024*1024)",
             "sotp-section-1-address"            : "(MBED_CONF_APP_FLASH_START_ADDRESS + MBED_CONF_APP_FLASH_SIZE - 2*(256*1024))",
             "sotp-section-1-size"               : "(256*1024)",
             "sotp-section-2-address"            : "(MBED_CONF_APP_FLASH_START_ADDRESS + MBED_CONF_APP_FLASH_SIZE - 1*(256*1024))",
             "sotp-section-2-size"               : "(256*1024)",
-            "sotp-num-sections"                 : 2,
-            "target.bootloader_img"             : "bootloader/mbed-bootloader-NUCLEO_F746ZG.bin",
-            "target.header_offset"              : "0x10000",
-            "target.app_offset"                 : "0x10400",
-            "update-client.application-details" : "(MBED_CONF_APP_FLASH_START_ADDRESS + 64*1024)"
+            "target.bootloader_img"             : "bootloader/mbed-bootloader-NUCLEO_F746ZG.bin"
+        },
+        "NUCLEO_F207ZG": {
+            "target.components_add"             : ["SD"],
+            "target.macros_add"                 : ["MBEDTLS_TEST_NULL_ENTROPY", "MBEDTLS_NO_DEFAULT_ENTROPY_SOURCES"],
+            "sd.SPI_MOSI"                       : "PC_12",
+            "sd.SPI_MISO"                       : "PC_11",
+            "sd.SPI_CLK"                        : "PC_10",
+            "sd.SPI_CS"                         : "PC_9",
+            "flash-start-address"               : "0x08000000",
+            "flash-size"                        : "(1024*1024)",
+            "sotp-section-1-address"            : "(MBED_CONF_APP_FLASH_START_ADDRESS + MBED_CONF_APP_FLASH_SIZE - 2*(128*1024))",
+            "sotp-section-1-size"               : "(128*1024)",
+            "sotp-section-2-address"            : "(MBED_CONF_APP_FLASH_START_ADDRESS + MBED_CONF_APP_FLASH_SIZE - 1*(128*1024))",
+            "sotp-section-2-size"               : "(128*1024)",
+            "target.bootloader_img"             : "bootloader/mbed-bootloader-NUCLEO_F207ZG.bin"
         },
         "DISCO_L475VG_IOT01A": {
-            "target.features_add"               : ["BOOTLOADER"],
             "target.components_add"             : ["QSPIF"],
             "target.components_remove"          : ["FLASHIAP"],
             "target.extra_labels_add"           : ["WIFI_ISM43362"],
@@ -117,17 +113,12 @@
             "sotp-section-1-size"               : "(2*1024)",
             "sotp-section-2-address"            : "(MBED_CONF_APP_FLASH_START_ADDRESS + MBED_CONF_APP_FLASH_SIZE - 1*(2*1024))",
             "sotp-section-2-size"               : "(2*1024)",
-            "sotp-num-sections"                 : 2,
             "target.bootloader_img"             : "bootloader/mbed-bootloader-DISCO_L475VG_IOT01A.bin",
-            "target.header_offset"              : "0x10000",
-            "target.app_offset"                 : "0x10400",
-            "update-client.application-details" : "(MBED_CONF_APP_FLASH_START_ADDRESS + 64*1024)",
             "update-client.storage-address"     : "(1024*1024*2)",
             "update-client.storage-size"        : "(1024*1024*2)",
-            "update-client.storage-locations"   : 1
+            "button-pressed-state"              : 0
         },
         "DISCO_F413ZH": {
-            "target.features_add"               : ["BOOTLOADER"],
             "target.extra_labels_add"           : ["WIFI_ISM43362"],
             "target.components_add"             : ["QSPIF"],
             "target.network-default-interface-type" : "WIFI",
@@ -137,17 +128,24 @@
             "sotp-section-1-size"               : "(128*1024)",
             "sotp-section-2-address"            : "(MBED_CONF_APP_FLASH_START_ADDRESS + MBED_CONF_APP_FLASH_SIZE - 1*(128*1024))",
             "sotp-section-2-size"               : "(128*1024)",
-            "sotp-num-sections"                 : 2,
             "target.bootloader_img"             : "bootloader/mbed-bootloader-DISCO_F413ZH.bin",
-            "target.header_offset"              : "0x10000",
-            "target.app_offset"                 : "0x10400",
-            "update-client.application-details" : "(MBED_CONF_APP_FLASH_START_ADDRESS + 64*1024)",
             "update-client.storage-address"     : "(1024*1024*2)",
-            "update-client.storage-size"        : "(1024*1024*2)",
-            "update-client.storage-locations"   : 1
+            "update-client.storage-size"        : "(1024*1024*2)"
+        },
+        "DISCO_F746NG": {
+            "target.components_add"             : ["QSPIF"],
+            "target.components_remove"          : ["FLASHIAP", "SD"],
+            "flash-start-address"               : "0x08000000",
+            "flash-size"                        : "(1024*1024)",
+            "sotp-section-1-address"            : "(MBED_CONF_APP_FLASH_START_ADDRESS + MBED_CONF_APP_FLASH_SIZE - 2*(256*1024))",
+            "sotp-section-1-size"               : "(256*1024)",
+            "sotp-section-2-address"            : "(MBED_CONF_APP_FLASH_START_ADDRESS + MBED_CONF_APP_FLASH_SIZE - 1*(256*1024))",
+            "sotp-section-2-size"               : "(256*1024)",
+            "target.bootloader_img"             : "bootloader/mbed-bootloader-DISCO_F746NG.bin",
+            "update-client.storage-address"     : "(1024*1024*2)",
+            "update-client.storage-size"        : "(1024*1024*2)"
         },
         "NUMAKER_PFM_NUC472": {
-            "target.features_add"               : ["BOOTLOADER"],
             "target.components_add"             : ["NUSD"],
             "target.network-default-interface-type" : "ETHERNET",
             "drivers.uart-serial-rxbuf-size"    : 1024,
@@ -158,14 +156,9 @@
             "sotp-section-1-size"               : "(4*1024)",
             "sotp-section-2-address"            : "(MBED_CONF_APP_FLASH_START_ADDRESS + MBED_CONF_APP_FLASH_SIZE - 1*(4*1024))",
             "sotp-section-2-size"               : "(4*1024)",
-            "sotp-num-sections"                 : 2,
-            "target.bootloader_img"             : "bootloader/mbed-bootloader-NUMAKER_PFM_NUC472.bin",
-            "target.header_offset"              : "0x10000",
-            "target.app_offset"                 : "0x10400",
-            "update-client.application-details" : "(MBED_CONF_APP_FLASH_START_ADDRESS + 64*1024)"
+            "target.bootloader_img"             : "bootloader/mbed-bootloader-NUMAKER_PFM_NUC472.bin"
         },
         "NUMAKER_PFM_M487": {
-            "target.features_add"               : ["BOOTLOADER"],
             "target.network-default-interface-type" : "ETHERNET",
             "target.components_add"             : ["NUSD"],
             "drivers.uart-serial-rxbuf-size"    : 1024,
@@ -176,14 +169,9 @@
             "sotp-section-1-size"               : "(4*1024)",
             "sotp-section-2-address"            : "(MBED_CONF_APP_FLASH_START_ADDRESS + MBED_CONF_APP_FLASH_SIZE - 1*(4*1024))",
             "sotp-section-2-size"               : "(4*1024)",
-            "sotp-num-sections"                 : 2,
-            "target.bootloader_img"             : "bootloader/mbed-bootloader-NUMAKER_PFM_M487.bin",
-            "target.header_offset"              : "0x10000",
-            "target.app_offset"                 : "0x10400",
-            "update-client.application-details" : "(MBED_CONF_APP_FLASH_START_ADDRESS + 64*1024)"
+            "target.bootloader_img"             : "bootloader/mbed-bootloader-NUMAKER_PFM_M487.bin"
         },
         "NUMAKER_IOT_M487": {
-            "target.features_add"               : ["BOOTLOADER"],
             "target.components_add"             : ["NUSD"],
             "target.network-default-interface-type" : "WIFI",
             "esp8266.tx"                        : "PH_8",
@@ -197,14 +185,35 @@
             "sotp-section-1-size"               : "(4*1024)",
             "sotp-section-2-address"            : "(MBED_CONF_APP_FLASH_START_ADDRESS + MBED_CONF_APP_FLASH_SIZE - 1*(4*1024))",
             "sotp-section-2-size"               : "(4*1024)",
-            "sotp-num-sections"                 : 2,
-            "target.bootloader_img"             : "bootloader/mbed-bootloader-NUMAKER_IOT_M487.bin",
-            "target.header_offset"              : "0x10000",
-            "target.app_offset"                 : "0x10400",
-            "update-client.application-details" : "(MBED_CONF_APP_FLASH_START_ADDRESS + 64*1024)"
+            "target.bootloader_img"             : "bootloader/mbed-bootloader-NUMAKER_IOT_M487.bin"
+        },
+        "SDT64B": {
+            "target.components_add"             : ["SD"],
+            "sd.SPI_MOSI"                       : "PTB16",
+            "sd.SPI_MISO"                       : "PTB17",
+            "sd.SPI_CLK"                        : "PTB11",
+            "sd.SPI_CS"                         : "PTB10",
+            "flash-start-address"               : "0x0",
+            "flash-size"                        : "(1024*1024)",
+            "sotp-section-1-address"            : "(MBED_CONF_APP_FLASH_START_ADDRESS + MBED_CONF_APP_FLASH_SIZE - 2*(4*1024))",
+            "sotp-section-1-size"               : "(4*1024)",
+            "sotp-section-2-address"            : "(MBED_CONF_APP_FLASH_START_ADDRESS + MBED_CONF_APP_FLASH_SIZE - 1*(4*1024))",
+            "sotp-section-2-size"               : "(4*1024)",
+            "target.bootloader_img"             : "bootloader/mbed-bootloader-SDT64B.bin"
+        },
+        "GR_LYCHEE": {
+            "target.components_add"             : ["SD"],
+            "target.extra_labels_add"           : ["ESP32_DRIVER"],
+            "target.network-default-interface-type" : "WIFI",
+            "flash-start-address"               : "0x18000000",
+            "flash-size"                        : "(8*1024*1024)",
+            "sotp-section-1-address"            : "(MBED_CONF_APP_FLASH_START_ADDRESS + MBED_CONF_APP_FLASH_SIZE - 2*(4*1024))",
+            "sotp-section-1-size"               : "(4*1024)",
+            "sotp-section-2-address"            : "(MBED_CONF_APP_FLASH_START_ADDRESS + MBED_CONF_APP_FLASH_SIZE - 1*(4*1024))",
+            "sotp-section-2-size"               : "(4*1024)",
+            "target.bootloader_img"             : "bootloader/mbed-bootloader-GR_LYCHEE.bin"
         },
         "UBLOX_EVK_ODIN_W2": {
-            "target.features_add"               : ["BOOTLOADER"],
             "target.components_add"             : ["SD"],
             "target.network-default-interface-type" : "WIFI",
             "flash-start-address"               : "0x08000000",
@@ -213,30 +222,13 @@
             "sotp-section-1-size"               : "(128*1024)",
             "sotp-section-2-address"            : "(MBED_CONF_APP_FLASH_START_ADDRESS + MBED_CONF_APP_FLASH_SIZE - 1*(128*1024))",
             "sotp-section-2-size"               : "(128*1024)",
-            "sotp-num-sections"                 : 2,
             "target.bootloader_img"             : "bootloader/mbed-bootloader-UBLOX_EVK_ODIN_W2.bin",
-            "target.header_offset"              : "0x10000",
-            "target.app_offset"                 : "0x10400",
-            "update-client.application-details" : "(MBED_CONF_APP_FLASH_START_ADDRESS + 64*1024)"
+            "use-button"                        : false
         },
         "UBLOX_C030_U201": {
-            "target.features_add"               : ["STORAGE","BOOTLOADER", "LWIP"],
+            "target.features_add"               : ["STORAGE", "LWIP"],
             "target.components_add"             : ["SD"],
             "target.network-default-interface-type" : "CELLULAR",
-            "target.header_format": [
-                ["magic", "const", "32be", "0x5a51b3d4"],
-                ["version", "const", "32be", "2"],
-                ["firmwareVersion", "timestamp", "64be", null],
-                ["firmwareSize", "size", "64be", ["application"]],
-                ["firmwareHash", "digest", "SHA256", "application"],
-                ["hashpad", "const", "64be", "0"],
-                ["hashpad", "const", "64be", "0"],
-                ["hashpad", "const", "64be", "0"],
-                ["hashpad", "const", "64be", "0"],
-                ["campaign", "const", "64be", "0"],
-                ["campaign", "const", "64be", "0"],
-                ["firmwareSignatureSize", "const", "32be", "0"],
-                ["headerCRC", "digest", "CRCITT32be", "header"]],
             "lwip.ipv4-enabled"                 : true,
             "lwip.ethernet-enabled"             : false,
             "lwip.ppp-enabled"                  : true,
@@ -248,14 +240,9 @@
             "sotp-section-1-size"               : "(128*1024)",
             "sotp-section-2-address"            : "(MBED_CONF_APP_FLASH_START_ADDRESS + MBED_CONF_APP_FLASH_SIZE - 1*(128*1024))",
             "sotp-section-2-size"               : "(128*1024)",
-            "sotp-num-sections"                 : 2,
-            "target.bootloader_img"             : "bootloader/mbed-bootloader-UBLOX_C030_U201.bin",
-            "target.header_offset"              : "0x10000",
-            "target.app_offset"                 : "0x10400",
-            "update-client.application-details" : "(MBED_CONF_APP_FLASH_START_ADDRESS + 64*1024)"
+            "target.bootloader_img"             : "bootloader/mbed-bootloader-UBLOX_C030_U201.bin"
         },
         "MTB_MXCHIP_EMW3166": {
-            "target.features_add"               : ["BOOTLOADER"],
             "target.components_add"             : ["SPIF"],
             "spif-driver.SPI_MOSI"              : "PB_15",
             "spif-driver.SPI_MISO"              : "PB_14",
@@ -267,18 +254,15 @@
             "sotp-section-1-size"               : "(16*1024)",
             "sotp-section-2-address"            : "(MBED_CONF_APP_FLASH_START_ADDRESS + 64*1024)",
             "sotp-section-2-size"               : "(16*1024)",
-            "sotp-num-sections"                 : 2,
             "target.bootloader_img"             : "bootloader/mbed-bootloader-MTB_MXCHIP_EMW3166.bin",
             "target.header_offset"              : "0x20000",
             "target.app_offset"                 : "0x20400",
             "target.OUTPUT_EXT"                 : "hex",
             "update-client.application-details" : "(MBED_CONF_APP_FLASH_START_ADDRESS + 128*1024)",
             "update-client.storage-address"     : "(1024*1024*2)",
-            "update-client.storage-size"        : "(1024*1024*1)",
-            "update-client.storage-locations"   : "1"
+            "update-client.storage-size"        : "(1024*1024*1)"
         },
         "MTB_USI_WM_BN_BM_22": {
-            "target.features_add"               : ["BOOTLOADER"],
             "target.components_add"             : ["SPIF"],
             "spif-driver.SPI_MOSI"              : "PC_3",
             "spif-driver.SPI_MISO"              : "PC_2",
@@ -290,15 +274,40 @@
             "sotp-section-1-size"               : "(16*1024)",
             "sotp-section-2-address"            : "(MBED_CONF_APP_FLASH_START_ADDRESS + 64*1024)",
             "sotp-section-2-size"               : "(16*1024)",
-            "sotp-num-sections"                 : 2,
             "target.bootloader_img"             : "bootloader/mbed-bootloader-MTB_USI_WM_BN_BM_22.bin",
             "target.header_offset"              : "0x20000",
             "target.app_offset"                 : "0x20400",
             "target.OUTPUT_EXT"                 : "hex",
             "update-client.application-details" : "(MBED_CONF_APP_FLASH_START_ADDRESS + 128*1024)",
             "update-client.storage-address"     : "(1024*1024*2)",
+            "update-client.storage-size"        : "(1024*1024*1)"
+        },
+        "MTB_ADV_WISE_1570": {
+            "target.components_add"             : ["SPIF"],
+            "spif-driver.SPI_FREQ"              : 20000000,
+            "target.network-default-interface-type" : "CELLULAR",
+            "cellular.debug-at"                 : false,
+            "cellular.use-apn-lookup"           : false,
+            "platform.stdio-baud-rate"          : 115200,
+            "platform.default-serial-baud-rate" : 115200,
+            "flash-start-address"               : "0x08000000",
+            "flash-size"                        : "(1024*1024)",
+            "sotp-section-1-address"            : "(MBED_CONF_APP_FLASH_START_ADDRESS + MBED_CONF_APP_FLASH_SIZE - 2*(4*1024))",
+            "sotp-section-1-size"               : "(4*1024)",
+            "sotp-section-2-address"            : "(MBED_CONF_APP_FLASH_START_ADDRESS + MBED_CONF_APP_FLASH_SIZE - 1*(4*1024))",
+            "sotp-section-2-size"               : "(4*1024)",
+            "target.bootloader_img"             : "bootloader/mbed-bootloader-MTB_ADV_WISE_1570.bin",
+            "target.header_offset"              : "0x8000",
+            "target.app_offset"                 : "0x8400",
+            "target.OUTPUT_EXT"                 : "hex",
+            "update-client.application-details" : "(MBED_CONF_APP_FLASH_START_ADDRESS + 32*1024)",
+            "update-client.storage-address"     : "(1024*1024*2)",
             "update-client.storage-size"        : "(1024*1024*1)",
-            "update-client.storage-locations"   : "1"
+            "mcc_transport_mode"                : 0,
+            "mbed-client.sn-coap-duplication-max-msgs-count": 1,
+            "nsapi.dns-response-wait-time"      : 30000,
+            "client_app.pal_dtls_peer_min_timeout" : "20000",
+            "pal-udp-mtu-size"                  : 1358
         }
     },
     "config": {
@@ -345,6 +354,25 @@
             "help": "Number of SOTP sections",
             "macro_name": "PAL_INT_FLASH_NUM_SECTIONS",
             "value": null
+        },
+        "pal-udp-mtu-size": {
+            "help": "Enforced usage of MTU limits",
+            "macro_name": "PAL_UDP_MTU_SIZE",
+            "value": null
+        },
+        "mcc_transport_mode": {
+            "help": "0 = TCP, 1 = TCP_QUEUE_MODE, 2 = UDP, 3 = UDP_QUEUE_MODE",
+            "macro_name": "MBED_CLOUD_CLIENT_TRANSPORT_MODE",
+            "value": null
+        },
+        "use-button": {
+            "help": "Whether the target has a button",
+            "macro_name": "USE_BUTTON",
+            "value": true
+        },
+        "button-pressed-state": {
+            "help": "Value of the button when pressed",
+            "value": 1
         }
     }
 }
