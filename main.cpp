@@ -46,6 +46,7 @@ DigitalOut led(LED1);
 // Declaring pointers for access to Pelion Device Management Client resources outside of main()
 MbedCloudClientResource *button_res;
 MbedCloudClientResource *led_res;
+MbedCloudClientResource *post_res;
 
 // An event queue is a very useful structure to debounce information between contexts (e.g. ISR and normal threads)
 // This is great because things such as network operations are illegal in ISR, so updating a resource in a button's fall() function is not allowed
@@ -56,7 +57,7 @@ EventQueue eventQueue;
  * @param resource The resource that triggered the callback
  * @param newValue Updated value for the resource
  */
-void led_put_callback(MbedCloudClientResource *resource, m2m::String newValue) {
+void put_callback(MbedCloudClientResource *resource, m2m::String newValue) {
     printf("PUT received. New value: %s\n", newValue.c_str());
     led = atoi(newValue.c_str());
 }
@@ -150,11 +151,11 @@ int main(void) {
     led_res = client.create_resource("3201/0/5853", "led_state");
     led_res->set_value(led.read());
     led_res->methods(M2MMethod::GET | M2MMethod::PUT);
-    led_res->attach_put_callback(led_put_callback);
+    led_res->attach_put_callback(put_callback);
 
-    led_res = client.create_resource("3300/0/5605", "execute_function");
-    led_res->methods(M2MMethod::POST);
-    led_res->attach_post_callback(post_callback);
+    post_res = client.create_resource("3300/0/5605", "execute_function");
+    post_res->methods(M2MMethod::POST);
+    post_res->attach_post_callback(post_callback);
 
     printf("Initialized Pelion Device Management Client. Registering...\n");
 
