@@ -7,7 +7,7 @@
             "mbed-trace.enable"                         : null,
             "nsapi.default-wifi-security"               : "WPA_WPA2",
             "nsapi.default-wifi-ssid"                   : "\"SSID\"",
-            "nsapi.default-wifi-password"               : "\"Password\""
+            "nsapi.default-wifi-password"               : "\"password\""
         },
         "K64F": {
             "target.components_add"                     : ["SD"],
@@ -40,6 +40,40 @@
             "update-client.storage-locations"           : "1",
             "target.features_add"                       : ["BOOTLOADER"],
             "target.bootloader_img"                     : "bootloader/mbed-bootloader-K66F.bin",
+            "target.header_offset"                      : "0x10000",
+            "target.app_offset"                         : "0x10400"
+        },
+        "NUCLEO_F412ZG": {
+            "target.components_add"                     : ["SD"],
+            "sd.SPI_MOSI"                               : "D11",
+            "sd.SPI_MISO"                               : "D12",
+            "sd.SPI_CLK"                                : "D13",
+            "sd.SPI_CS"                                 : "D10",
+            "target.components_add"                     : ["WIFI_IDW04A1"],
+            "target.network-default-interface-type"     : "WIFI",
+            "target.macros_add"                         : [
+                "IDW04A1_WIFI_HW_BUG_WA",
+                "SPWDFSAXX_RESET_PIN=D7",
+                "SPWDFSAXX_WAKEUP_PIN=A3"
+            ],
+            "idw0xx1.provide-default"                   : true,
+            "idw0xx1.expansion-board"                   : "IDW04A1",
+            "drivers.uart-serial-txbuf-size"            : 512,
+            "drivers.uart-serial-rxbuf-size"            : 512,
+            "idw0xx1.tx"                                : "D1",
+            "idw0xx1.rx"                                : "D0",
+            "device-management.flash-start-address"     : "0x08000000",
+            "device-management.flash-size"              : "(1024*1024)",
+            "device-management.sotp-section-1-address"  : "(MBED_CONF_APP_FLASH_START_ADDRESS + MBED_CONF_APP_FLASH_SIZE - 2*(128*1024))",
+            "device-management.sotp-section-1-size"     : "(128*1024)",
+            "device-management.sotp-section-2-address"  : "(MBED_CONF_APP_FLASH_START_ADDRESS + MBED_CONF_APP_FLASH_SIZE - 1*(128*1024))",
+            "device-management.sotp-section-2-size"     : "(128*1024)",
+            "update-client.application-details"         : "(MBED_CONF_APP_FLASH_START_ADDRESS + 64*1024)",
+            "update-client.storage-address"             : "(64*1024*1024)",
+            "update-client.storage-size"                : "(2*1024*1024)",
+            "update-client.storage-locations"           : "1",
+            "target.features_add"                       : ["BOOTLOADER"],
+            "target.bootloader_img"                     : "bootloader/mbed-bootloader-NUCLEO_F412ZG.bin",
             "target.header_offset"                      : "0x10000",
             "target.app_offset"                         : "0x10400"
         },
@@ -108,7 +142,6 @@
         },
         "NUCLEO_F207ZG": {
             "target.components_add"                     : ["SD"],
-            "target.macros_add"                         : ["MBEDTLS_TEST_NULL_ENTROPY", "MBEDTLS_NO_DEFAULT_ENTROPY_SOURCES"],
             "sd.SPI_MOSI"                               : "PC_12",
             "sd.SPI_MISO"                               : "PC_11",
             "sd.SPI_CLK"                                : "PC_10",
@@ -128,8 +161,43 @@
             "target.header_offset"                      : "0x10000",
             "target.app_offset"                         : "0x10400"
         },
+        "NUCLEO_L4R5ZI": {
+            "target.components_add"                     : ["SD"],
+            "sd.SPI_MOSI"                               : "D11",
+            "sd.SPI_MISO"                               : "D12",
+            "sd.SPI_CLK"                                : "D13",
+            "sd.SPI_CS"                                 : "D10",
+            "target.network-default-interface-type"     : "WIFI",
+            "target.components_add"                     : ["WIFI_IDW04A1"],
+            "target.macros_add"                         : [
+                "IDW04A1_WIFI_HW_BUG_WA",
+                "SPWDFSAXX_RESET_PIN=D7",
+                "SPWDFSAXX_WAKEUP_PIN=A3"
+            ],
+            "idw0xx1.provide-default"                   : true,
+            "idw0xx1.expansion-board"                   : "IDW04A1",
+            "drivers.uart-serial-txbuf-size"            : 512,
+            "drivers.uart-serial-rxbuf-size"            : 512,
+            "idw0xx1.tx"                                : "D1",
+            "idw0xx1.rx"                                : "D0",
+            "device-management.flash-start-address"     : "0x08000000",
+            "device-management.flash-size"              : "(2048*1024)",
+            "device-management.sotp-section-1-address"  : "(MBED_CONF_APP_FLASH_START_ADDRESS + MBED_CONF_APP_FLASH_SIZE - 2*(128*1024))",
+            "device-management.sotp-section-1-size"     : "(128*1024)",
+            "device-management.sotp-section-2-address"  : "(MBED_CONF_APP_FLASH_START_ADDRESS + MBED_CONF_APP_FLASH_SIZE - 1*(128*1024))",
+            "device-management.sotp-section-2-size"     : "(128*1024)",
+            "update-client.application-details"         : "(MBED_CONF_APP_FLASH_START_ADDRESS + 64*1024)",
+            "update-client.storage-address"             : "(64*1024*1024)",
+            "update-client.storage-size"                : "(2*1024*1024)",
+            "update-client.storage-locations"           : "1",
+            "target.features_add"                       : ["BOOTLOADER"],
+            "target.bootloader_img"                     : "bootloader/mbed-bootloader-NUCLEO_L4R5ZI.bin",
+            "target.header_offset"                      : "0x10000",
+            "target.app_offset"                         : "0x10400"
+        },
         "DISCO_L475VG_IOT01A": {
             "target.components_add"                     : ["QSPIF"],
+            "target.components_add"                     : ["WIFI_ISM43362"],
             "target.network-default-interface-type"     : "WIFI",
             "device-management.flash-start-address"     : "0x08000000",
             "device-management.flash-size"              : "(1024*1024)",
@@ -149,6 +217,7 @@
         },
         "DISCO_F413ZH": {
             "target.components_add"                     : ["QSPIF"],
+            "target.components_add"                     : ["WIFI_ISM43362"],
             "target.network-default-interface-type"     : "WIFI",
             "device-management.flash-start-address"     : "0x08000000",
             "device-management.flash-size"              : "(1536*1024)",
@@ -180,6 +249,24 @@
             "update-client.storage-locations"           : "1",
             "target.features_add"                       : ["BOOTLOADER"],
             "target.bootloader_img"                     : "bootloader/mbed-bootloader-DISCO_F746NG.bin",
+            "target.header_offset"                      : "0x10000",
+            "target.app_offset"                         : "0x10400"
+        },
+        "DISCO_F769NI": {
+            "target.components_add"                     : ["QSPIF"],
+            "target.components_remove"                  : ["SD"],
+            "device-management.flash-start-address"     : "0x08000000",
+            "device-management.flash-size"              : "(2*1024*1024)",
+            "device-management.sotp-section-1-address"  : "(MBED_CONF_APP_FLASH_START_ADDRESS + MBED_CONF_APP_FLASH_SIZE - 2*(256*1024))",
+            "device-management.sotp-section-1-size"     : "(256*1024)",
+            "device-management.sotp-section-2-address"  : "(MBED_CONF_APP_FLASH_START_ADDRESS + MBED_CONF_APP_FLASH_SIZE - 1*(256*1024))",
+            "device-management.sotp-section-2-size"     : "(256*1024)",
+            "update-client.application-details"         : "(MBED_CONF_APP_FLASH_START_ADDRESS + 64*1024)",
+            "update-client.storage-address"             : "(2*1024*1024)",
+            "update-client.storage-size"                : "(2*1024*1024)",
+            "update-client.storage-locations"           : "1",
+            "target.features_add"                       : ["BOOTLOADER"],
+            "target.bootloader_img"                     : "bootloader/mbed-bootloader-DISCO_F769NI.bin",
             "target.header_offset"                      : "0x10000",
             "target.app_offset"                         : "0x10400"
         },
@@ -270,7 +357,7 @@
         "GR_LYCHEE": {
             "target.features_add"                       : ["BOOTLOADER"],
             "target.components_add"                     : ["SD"],
-            "target.extra_labels_add"                   : ["ESP32_DRIVER"],
+            "target.components_add"                     : ["WIFI_ESP32"],
             "target.network-default-interface-type"     : "WIFI",
             "device-management.flash-start-address"     : "0x18000000",
             "device-management.flash-size"              : "(8*1024*1024)",
@@ -400,6 +487,24 @@
             "target.OUTPUT_EXT"                         : "hex",
             "mbed-client.sn-coap-duplication-max-msgs-count": 1,
             "nsapi.dns-response-wait-time"              : 30000
+        },
+        "EFM32GG11_STK3701": {
+            "target.components_add"                     : ["QSPIF"],
+            "qspif.QSPI_FREQ"                           : 10000000,
+            "device-management.flash-start-address"     : "0x0",
+            "device-management.flash-size"              : "(2*1024*1024)",
+            "device-management.sotp-section-1-address"  : "(MBED_CONF_APP_FLASH_START_ADDRESS + MBED_CONF_APP_FLASH_SIZE - 2*(4*1024))",
+            "device-management.sotp-section-1-size"     : "(4*1024)",
+            "device-management.sotp-section-2-address"  : "(MBED_CONF_APP_FLASH_START_ADDRESS + MBED_CONF_APP_FLASH_SIZE - 1*(4*1024))",
+            "device-management.sotp-section-2-size"     : "(4*1024)",
+            "update-client.application-details"         : "(MBED_CONF_APP_FLASH_START_ADDRESS + 64*1024)",
+            "update-client.storage-address"             : "(2*1024*1024)",
+            "update-client.storage-size"                : "(2*1024*1024)",
+            "update-client.storage-locations"           : "1",
+            "target.features_add"                       : ["BOOTLOADER"],
+            "target.bootloader_img"                     : "bootloader/mbed-bootloader-EFM32GG11_STK3701.bin",
+            "target.header_offset"                      : "0x10000",
+            "target.app_offset"                         : "0x10400"
         }
     },
     "config": {
