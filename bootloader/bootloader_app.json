@@ -199,6 +199,22 @@
             "application-start-address"        : "(MBED_CONF_APP_FLASH_START_ADDRESS + 65*1024)",
             "max-application-size"             : "DEFAULT_MAX_APPLICATION_SIZE"
         },
+        "NUCLEO_L476RG": {
+            "target.components_add"            : ["SD"],
+            "sd.SPI_MOSI"                      : "D11",
+            "sd.SPI_MISO"                      : "D12",
+            "sd.SPI_CLK"                       : "D13",
+            "sd.SPI_CS"                        : "D10",
+            "flash-start-address"              : "0x08000000",
+            "flash-size"                       : "(1024*1024)",
+            "nvstore.area_1_address"           : "(MBED_CONF_APP_FLASH_START_ADDRESS + MBED_CONF_APP_FLASH_SIZE - 2*(128*1024))",
+            "nvstore.area_1_size"              : "(128*1024)",
+            "nvstore.area_2_address"           : "(MBED_CONF_APP_FLASH_START_ADDRESS + MBED_CONF_APP_FLASH_SIZE - 1*(128*1024))",
+            "nvstore.area_2_size"              : "(128*1024)",
+            "update-client.application-details": "(MBED_CONF_APP_FLASH_START_ADDRESS + 64*1024)",
+            "application-start-address"        : "(MBED_CONF_APP_FLASH_START_ADDRESS + 65*1024)",
+            "max-application-size"             : "DEFAULT_MAX_APPLICATION_SIZE"
+        },
         "DISCO_L475VG_IOT01A": {
             "target.components_add"            : ["QSPIF"],
             "flash-start-address"              : "0x08000000",
@@ -230,6 +246,22 @@
             "update-client.application-details": "(MBED_CONF_APP_FLASH_START_ADDRESS + 64*1024)",
             "application-start-address"        : "(MBED_CONF_APP_FLASH_START_ADDRESS + 65*1024)",
             "max-application-size"             : "DEFAULT_MAX_APPLICATION_SIZE"
+        },
+        "DISCO_F469NI": {
+            "target.components_add"            : ["QSPIF"],
+            "target.components_remove"         : ["FLASHIAP"],
+            "flash-start-address"              : "0x08000000",
+            "flash-size"                       : "(2*1024*1024)",
+            "nvstore.area_1_address"           : "(MBED_CONF_APP_FLASH_START_ADDRESS + MBED_CONF_APP_FLASH_SIZE - 2*(128*1024))",
+            "nvstore.area_1_size"              : "(128*1024)",
+            "nvstore.area_2_address"           : "(MBED_CONF_APP_FLASH_START_ADDRESS + MBED_CONF_APP_FLASH_SIZE - 1*(128*1024))",
+            "nvstore.area_2_size"              : "(128*1024)",
+            "update-client.application-details": "(MBED_CONF_APP_FLASH_START_ADDRESS+64*1024)",
+            "application-start-address"        : "(MBED_CONF_APP_FLASH_START_ADDRESS+65*1024)",
+            "max-application-size"             : "DEFAULT_MAX_APPLICATION_SIZE",
+            "update-client.storage-address"    : "(1024*1024*2)",
+            "update-client.storage-size"       : "(1024*1024*2)",
+            "update-client.storage-locations"  : 1
         },
         "DISCO_F746NG": {
             "target.components_add"            : ["QSPIF"],
