@@ -15,26 +15,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 // ----------------------------------------------------------------------------
-
+ 
 #ifdef MBED_CLOUD_CLIENT_USER_CONFIG_FILE
 #include MBED_CLOUD_CLIENT_USER_CONFIG_FILE
 #endif
-
+ 
 #include <stdint.h>
-
+ 
 #ifdef MBED_CLOUD_DEV_UPDATE_ID
 const uint8_t arm_uc_vendor_id[16] = { "dev_manufacturer" };
 const uint16_t arm_uc_vendor_id_size = sizeof(arm_uc_vendor_id);
-
+ 
 const uint8_t arm_uc_class_id[16]  = { "dev_model_number" };
 const uint16_t arm_uc_class_id_size = sizeof(arm_uc_class_id);
 #endif
-
+ 
 #ifdef MBED_CLOUD_DEV_UPDATE_CERT
 const uint8_t arm_uc_default_fingerprint[32] = { 0 };
 const uint16_t arm_uc_default_fingerprint_size =
     sizeof(arm_uc_default_fingerprint);
-
+ 
 const uint8_t arm_uc_default_certificate[1] = { 0 };
 const uint16_t arm_uc_default_certificate_size =
     sizeof(arm_uc_default_certificate);
