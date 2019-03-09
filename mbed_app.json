@@ -6,8 +6,8 @@
             "platform.stdio-convert-newlines"           : true,
             "mbed-trace.enable"                         : null,
             "nsapi.default-wifi-security"               : "WPA_WPA2",
-            "nsapi.default-wifi-ssid"                   : "\"SSID\"",
-            "nsapi.default-wifi-password"               : "\"Password\""
+            "nsapi.default-wifi-ssid"                   : "\"mbedEnabled\"",
+            "nsapi.default-wifi-password"               : "\"validation\""
         },
         "K64F": {
             "target.components_add"                     : ["SD"],
@@ -236,6 +236,8 @@
             "target.macros_remove"                      : ["MBED_TICKLESS"],
             "target.components_add"                     : ["QSPIF"],
             "target.components_add"                     : ["WIFI_ISM43362"],
+            "target.extra_labels_remove"                : ["STM32L475xG"],
+            "target.extra_labels_add"                   : ["STM32L475xG_SRAM2"],
             "target.network-default-interface-type"     : "WIFI",
             "device-management.flash-start-address"     : "0x08000000",
             "device-management.flash-size"              : "(1024*1024)",
