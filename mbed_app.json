@@ -6,8 +6,8 @@
             "platform.stdio-convert-newlines"           : true,
             "mbed-trace.enable"                         : null,
             "nsapi.default-wifi-security"               : "WPA_WPA2",
-            "nsapi.default-wifi-ssid"                   : "\"mbedEnabled\"",
-            "nsapi.default-wifi-password"               : "\"validation\""
+            "nsapi.default-wifi-ssid"                   : "\"SSID\"",
+            "nsapi.default-wifi-password"               : "\"password\""
         },
         "K64F": {
             "target.components_add"                     : ["SD"],
