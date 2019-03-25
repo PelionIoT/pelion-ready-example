@@ -6,11 +6,4 @@ BUILD/
 .pytest_cache/
 .update-certificates/
 .manifest_tool.json
-combined.bin
 .mbed_cloud_config.json
-update_default_resources.c
-mbed_cloud_dev_credentials.c
-mbed-os/
-simple-mbed-cloud-client/
-drivers/network/WIFI_ISM43362/
-drivers/storage/COMPONENT_NUSD/
