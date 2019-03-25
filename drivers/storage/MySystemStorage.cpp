@@ -152,14 +152,14 @@ BlockDevice *BlockDevice::get_default_instance()
 
 FileSystem *FileSystem::get_default_instance()
 {
-#if COMPONENT_SPIF || COMPONENT_QSPIF || COMPONENT_DATAFLASH || COMPONENT_NUSD
+#if COMPONENT_SPIF || COMPONENT_QSPIF || COMPONENT_DATAFLASH
 
     static LittleFileSystem flash("flash", BlockDevice::get_default_instance());
     flash.set_as_default();
 
     return &flash;
 
-#elif COMPONENT_SD
+#elif COMPONENT_SD || COMPONENT_NUSD
 
     static FATFileSystem sdcard("sd", BlockDevice::get_default_instance());
     sdcard.set_as_default();
