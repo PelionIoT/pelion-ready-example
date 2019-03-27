@@ -99,7 +99,7 @@ If you want to change this to an actual button, here is how to do it:
 
 ## Enabling firmware updates
 
-Mbed OS 5.10 and Mbed CLI 1.8 simplifies the process to enable and perform Firmware Updates. Here is a summary on how to configure the device and verify its correct behaviour.
+Mbed OS 5.10 and Mbed CLI 1.9 simplifies the process to enable and perform Firmware Updates. Here is a summary on how to configure the device and verify its correct behaviour.
 
 For full documentation about bootloaders and firmware update, read the following documents:
 
