@@ -30,10 +30,10 @@ BlockDevice *bd = BlockDevice::get_default_instance();
 
 #if COMPONENT_SD || COMPONENT_NUSD
 // Use FATFileSystem for SD card type blockdevices
-FATFileSystem fs("fs", bd);
+FATFileSystem fs("fs");
 #else
 // Use LittleFileSystem for non-SD block devices to enable wear leveling and other functions
-LittleFileSystem fs("fs", bd);
+LittleFileSystem fs("fs");
 #endif
 
 #if USE_BUTTON == 1
@@ -107,10 +107,23 @@ void registered(const ConnectorClientEndpointInfo *endpoint) {
 int main(void) {
     printf("\nStarting Simple Pelion Device Management Client example\n");
 
+    int storage_status = fs.mount(bd);
+    if (storage_status != 0) {
+        printf("Storage mounting failed.\n");
+    }
+
 #if USE_BUTTON == 1
     // If the User button is pressed ons start, then format storage.
-    if (button.read() == MBED_CONF_APP_BUTTON_PRESSED_STATE) {
-        printf("User button is pushed on start. Formatting the storage...\n");
+    bool btn_pressed = (button.read() == MBED_CONF_APP_BUTTON_PRESSED_STATE);
+    if (btn_pressed) {
+        printf("User button is pushed on start...\n");
+    }
+#else
+    bool btn_pressed = FALSE;
+#endif /* USE_BUTTON */
+
+    if (storage_status || btn_pressed) {
+        printf("Formatting the storage...\n");
         int storage_status = StorageHelper::format(&fs, bd);
         if (storage_status != 0) {
             printf("ERROR: Failed to reformat the storage (%d).\n", storage_status);
@@ -118,7 +131,6 @@ int main(void) {
     } else {
         printf("You can hold the user button during boot to format the storage and change the device identity.\n");
     }
-#endif /* USE_BUTTON */
 
     // Connect to the Internet (DHCP is expected to be on)
     printf("Connecting to the network using the default network interface...\n");
