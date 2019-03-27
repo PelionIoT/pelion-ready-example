@@ -41,7 +41,7 @@ InterruptIn button(BUTTON1);
 #endif /* USE_BUTTON */
 
 // Default LED to use for PUT/POST example
-DigitalOut led(LED1);
+DigitalOut led(LED1, 0);
 
 // Declaring pointers for access to Pelion Device Management Client resources outside of main()
 MbedCloudClientResource *button_res;
