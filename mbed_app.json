@@ -5,6 +5,7 @@
             "platform.stdio-baud-rate"                  : 115200,
             "platform.stdio-convert-newlines"           : true,
             "mbed-trace.enable"                         : null,
+            "mbed-cloud-client.external-sst-support"    : null,
             "nsapi.default-wifi-security"               : "WPA_WPA2",
             "nsapi.default-wifi-ssid"                   : "\"SSID\"",
             "nsapi.default-wifi-password"               : "\"Password\""
