@@ -119,7 +119,7 @@ int main(void) {
         printf("User button is pushed on start...\n");
     }
 #else
-    bool btn_pressed = FALSE;
+    bool btn_pressed = false;
 #endif /* USE_BUTTON */
 
     if (storage_status || btn_pressed) {
