@@ -1,3 +1,9 @@
+# Note
+
+**This example has been deprecated and is no longer maintained.**
+
+**Please migrate your example application to [mbed-os-example-pelion](https://github.com/ARMmbed/mbed-os-example-pelion)**
+
 # Pelion Device Ready example - template application
 
 (aka Simple Mbed Cloud Client template)
